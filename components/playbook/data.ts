@@ -1,5 +1,6 @@
 import { Briefcase } from "lucide-react";
 import { ActivityMark, type PlaybookIcon } from "@/components/playbook/icons";
+import { momentumSubstepDetails } from "@/components/playbook/substep-details";
 
 export type LayerDefinition = {
   id: string;
@@ -12,12 +13,23 @@ export type MomentumSubstep = {
   id: string;
   title: string;
   bullets: string[];
+  details?: string[];
 };
 
 export type MomentumStep = {
   id: string;
   label: string;
   substeps: MomentumSubstep[];
+};
+
+export type MomentumDefinitionSection = {
+  title: string;
+  lines: string[];
+};
+
+export type MomentumDefinition = {
+  title: string;
+  sections: MomentumDefinitionSection[];
 };
 
 export type ConstructionTrack = {
@@ -53,7 +65,7 @@ export const layers: LayerDefinition[] = [
   },
 ];
 
-export const momentumSteps: MomentumStep[] = [
+const baseMomentumSteps: MomentumStep[] = [
   {
     id: "1",
     label: "Contact",
@@ -375,6 +387,733 @@ export const momentumSteps: MomentumStep[] = [
         id: "10.4",
         title: "Success Definition",
         bullets: ["Metrics"],
+      },
+    ],
+  },
+];
+
+export const momentumSteps: MomentumStep[] = baseMomentumSteps.map((step) => ({
+  ...step,
+  substeps: step.substeps.map((substep) => ({
+    ...substep,
+    details: momentumSubstepDetails[substep.id],
+  })),
+}));
+
+export const momentumDefinitions: MomentumDefinition[] = [
+  {
+    title: "Contact",
+    sections: [
+      {
+        title: "Definition",
+        lines: [
+          "Buyer acknowledges you exist and engages enough to allow a legitimate path toward deeper conversation.",
+          "Contact means:",
+          "Correct person engaged",
+          "Relevance recognized",
+          "Next interaction possible",
+          "If this fails:",
+          "You never enter the deal",
+          "No Interest stage happens",
+          "Deal is DEAD before birth",
+        ],
+      },
+      {
+        title: "Core Must-Win Mindset",
+        lines: [
+          "“Can I earn enough relevance and trust for this buyer to give me serious time?”",
+          "Not:",
+          "“How do I get a reply?”",
+          "Wrong mindset.",
+          "You need:",
+          "Commitment.",
+          "If buyer won’t give time:",
+          "You are losing.",
+        ],
+      },
+      {
+        title: "Buyer Reality (Alignment View)",
+        lines: [
+          "Buyer is thinking:",
+          "Why is this person contacting me?",
+          "Is this relevant?",
+          "Is this another generic sales interruption?",
+          "Is this worth even 30 seconds?",
+          "They are protecting:",
+          "Attention",
+          "Time",
+          "Reputation",
+          "Cognitive load",
+          "They are not asking:",
+          "“What does this seller want?”",
+          "They are asking:",
+          "“Why should I care?”",
+        ],
+      },
+      {
+        title: "What Must Be True To Progress",
+        lines: [
+          "Buyer must believe at least one of these:",
+          "This may relate to a real issue I have",
+          "This may be worth exploring",
+          "This person may understand something relevant",
+          "Taking a conversation is low-risk",
+          "And seller must have:",
+          "Right persona",
+          "Credible problem hypothesis",
+          "Clear next-step ask",
+          "If any is weak:",
+          "Contact stalls.",
+        ],
+      },
+    ],
+  },
+  {
+    title: "Interest",
+    sections: [
+      {
+        title: "Definition",
+        lines: [
+          "Buyer has moved beyond acknowledging you and is showing active curiosity about the problem or the conversation.",
+          "This means buyer is doing one or more of these:",
+          "Asking meaningful questions",
+          "Exploring implications",
+          "Sharing context voluntarily",
+          "Agreeing to a deeper conversation",
+          "Not interest:",
+          "“Sounds interesting”",
+          "“Send something over”",
+          "Being polite on a call",
+          "That is noise.",
+          "Interest means:",
+          "Buyer is leaning in.",
+          "If this fails:",
+          "Discovery never becomes real",
+          "You carry fake pipeline",
+          "Deal often dies later disguised as “stalled”",
+        ],
+      },
+      {
+        title: "Core Must-Win Mindset",
+        lines: [
+          "“Can I convert curiosity into structured willingness to explore?”",
+          "Not:",
+          "“How do I keep them talking?”",
+          "Wrong.",
+          "You need movement toward discovery.",
+          "If curiosity does not deepen:",
+          "You are losing control.",
+        ],
+      },
+      {
+        title: "Buyer Reality (Alignment View)",
+        lines: [
+          "Buyer is thinking:",
+          "Is this problem really worth attention?",
+          "Is this person credible?",
+          "Is deeper discussion worth time?",
+          "Am I exploring or getting pulled into a sales process?",
+          "Buyer is evaluating:",
+          "Relevance",
+          "Risk",
+          "Effort",
+          "Value of continued engagement",
+          "They are deciding whether to invest attention.",
+        ],
+      },
+      {
+        title: "What Must Be True To Progress",
+        lines: [
+          "Buyer must believe:",
+          "Problem may matter enough to unpack",
+          "Conversation may produce value",
+          "Deeper discussion feels low-risk",
+          "And seller must have:",
+          "Real interest signal (not politeness)",
+          "Curiosity converted into dialogue",
+          "Path toward discovery",
+          "If weak:",
+          "Fake opportunity.",
+        ],
+      },
+    ],
+  },
+  {
+    title: "Discovery",
+    sections: [
+      {
+        title: "Overview",
+        lines: [
+          "This is where real deals are either created or exposed as fiction.",
+          "Most weak deals are not lost in pricing.",
+          "They were never truly discovered.",
+        ],
+      },
+      {
+        title: "Definition",
+        lines: [
+          "Discovery is the process of establishing, with buyer agreement:",
+          "A meaningful problem exists",
+          "Its impact matters",
+          "Current state is insufficient",
+          "There is reason to change",
+          "If you only “asked questions,” that is not discovery.",
+          "Discovery means:",
+          "Shared understanding has been created.",
+          "If this fails:",
+          "Validation becomes generic",
+          "Stakeholder expansion weakens",
+          "Budget conversations collapse",
+          "Deal dies later as “no decision”",
+        ],
+      },
+      {
+        title: "Core Must-Win Mindset",
+        lines: [
+          "“Can I uncover truth the buyer will act on — not just collect information?”",
+          "Not:",
+          "“How do I complete qualification?”",
+          "Wrong.",
+          "This is not a checklist exercise.",
+          "This is diagnosis.",
+        ],
+      },
+      {
+        title: "Buyer Reality (Alignment View)",
+        lines: [
+          "Buyer is thinking:",
+          "Is this actually a problem worth changing?",
+          "Do I fully understand the issue myself?",
+          "Is change worth disruption?",
+          "Is this seller helping me think… or extracting data?",
+          "Buyer is deciding whether problem deserves action.",
+        ],
+      },
+      {
+        title: "What Must Be True To Progress",
+        lines: [
+          "Buyer must believe:",
+          "Problem is real",
+          "Impact matters",
+          "Doing nothing has consequences",
+          "Seller must have:",
+          "Root problem clarity",
+          "Impact clarity",
+          "Stakeholder insight",
+          "Change motivation identified",
+          "If weak:",
+          "Deal is fragile.",
+        ],
+      },
+    ],
+  },
+  {
+    title: "Validation",
+    sections: [
+      {
+        title: "Overview",
+        lines: [
+          "This is where the buyer moves from:",
+          "“We have a problem.”",
+          "to",
+          "“This may be a credible path to solve it.”",
+          "Most sellers turn this into a product demo.",
+          "That is where deals get weakened.",
+          "Validation is not “showing the product.”",
+          "Validation is proving fit.",
+        ],
+      },
+      {
+        title: "Definition",
+        lines: [
+          "Validation is the process where buyer confirms:",
+          "Your solution addresses their problem",
+          "It fits their use case",
+          "It can plausibly produce desired outcomes",
+          "This is not generic interest.",
+          "This is contextual solution confidence.",
+          "If this fails:",
+          "Buyer cannot take you internally",
+          "Champion weakens",
+          "Stakeholders resist",
+          "Deal often dies before Internal Discussion",
+        ],
+      },
+      {
+        title: "Core Must-Win Mindset",
+        lines: [
+          "“Can the buyer clearly see themselves succeeding with this?”",
+          "Not:",
+          "“How do I give a great demo?”",
+          "Wrong mindset.",
+          "The question is not:",
+          "Did they like what they saw?",
+          "It is:",
+          "Do they believe it fits them?",
+        ],
+      },
+      {
+        title: "Buyer Reality (Alignment View)",
+        lines: [
+          "Buyer is thinking:",
+          "Will this actually solve our problem?",
+          "Will this work in our environment?",
+          "Is this practical or just impressive?",
+          "Am I seeing relevance or just features?",
+          "They are evaluating:",
+          "Fit",
+          "Credibility",
+          "Risk",
+          "Real-world applicability",
+          "Not your product elegance.",
+        ],
+      },
+      {
+        title: "What Must Be True To Progress",
+        lines: [
+          "Buyer must believe:",
+          "Solution maps to their problem",
+          "Value feels plausible",
+          "Concerns are manageable",
+          "Seller must have:",
+          "Discovery-linked validation",
+          "Buyer confirmation of relevance",
+          "Early objections surfaced",
+          "If weak:",
+          "Validation is fake.",
+        ],
+      },
+    ],
+  },
+  {
+    title: "Internal Discussion",
+    sections: [
+      {
+        title: "Definition",
+        lines: [
+          "Buyer takes your solution internally and tries to justify it without you present",
+          "If this fails:",
+          "You don’t get stakeholder access",
+          "You don’t get budget conversation",
+          "Deal is DEAD (no notification)",
+        ],
+      },
+      {
+        title: "Core Must-Win Mindset",
+        lines: [
+          "“Can my champion sell this better than I can — when I’m not there?”",
+          "If answer = NO",
+          "You are already losing",
+        ],
+      },
+      {
+        title: "Buyer Reality (Alignment View)",
+        lines: [
+          "Your champion is thinking:",
+          "“How do I explain this clearly?”",
+          "“Will I look smart or stupid proposing this?”",
+          "“What objections will I face?”",
+          "“Is this worth the political risk?”",
+          "They are NOT thinking about your product",
+          "They are thinking about their internal survival",
+        ],
+      },
+      {
+        title: "What Must Be True To Progress",
+        lines: [
+          "Champion:",
+          "Understands the problem deeply",
+          "Believes in your solution",
+          "Can articulate value in their org language",
+          "Internal path is:",
+          "Known (who needs to approve)",
+          "Navigable (not blocked)",
+          "If any of this is weak:",
+          "Deal stalls here",
+        ],
+      },
+    ],
+  },
+  {
+    title: "Stakeholder Expansion",
+    sections: [
+      {
+        title: "Overview",
+        lines: [
+          "This is where deals stop being “one person likes us” and become an organizational decision.",
+          "Most enterprise deals do not die because the solution is weak.",
+          "They die because multiple stakeholders were never aligned.",
+          "This is where political complexity enters.",
+        ],
+      },
+      {
+        title: "Definition",
+        lines: [
+          "Stakeholder Expansion is the process of moving from a single-threaded opportunity (one primary contact/champion) to a multi-threaded deal where all critical decision participants are identified, engaged, and progressively aligned.",
+          "This means:",
+          "Relevant stakeholders are mapped",
+          "Their concerns are understood",
+          "Their incentives are addressed",
+          "Consensus begins forming",
+          "If this fails:",
+          "Hidden blockers emerge late",
+          "Champion loses internal support",
+          "Budget stalls",
+          "Procurement never starts",
+          "Deal dies as “internal misalignment”",
+        ],
+      },
+      {
+        title: "Core Must-Win Mindset",
+        lines: [
+          "“Can I build enough cross-functional alignment that this deal survives beyond one person?”",
+          "Not:",
+          "“How do I get more people into meetings?”",
+          "Wrong.",
+          "This is not stakeholder collection.",
+          "This is stakeholder alignment.",
+        ],
+      },
+      {
+        title: "Buyer Reality (Alignment View)",
+        lines: [
+          "Every stakeholder is asking different questions.",
+          "Finance:",
+          "Is this worth paying for?",
+          "Technical:",
+          "Will this create risk?",
+          "Users:",
+          "Will this make life harder?",
+          "Executive:",
+          "Why prioritize this?",
+          "They are not evaluating the same deal.",
+          "They are evaluating from different incentive structures.",
+          "Your job:",
+          "Align those incentives enough to prevent rejection.",
+        ],
+      },
+      {
+        title: "What Must Be True To Progress",
+        lines: [
+          "Must be true:",
+          "Critical stakeholders identified",
+          "No major unknown blocker left unmapped",
+          "Major stakeholder concerns addressed",
+          "Broad support exists for evaluation/progress",
+          "Seller must have:",
+          "Multi-threaded access",
+          "Persona-specific messaging",
+          "Consensus-building motion",
+          "If weak:",
+          "deal is politically fragile.",
+        ],
+      },
+    ],
+  },
+  {
+    title: "Pilot",
+    sections: [
+      {
+        title: "Overview",
+        lines: [
+          "This is where the deal moves from:",
+          "“We think this could work.”",
+          "to",
+          "“We have evidence it works.”",
+          "A pilot is not a trial.",
+          "A pilot is a controlled proof event.",
+          "Most deals do not fail in pilot because product fails.",
+          "They fail because pilot was badly designed.",
+        ],
+      },
+      {
+        title: "Definition",
+        lines: [
+          "Pilot is a bounded evaluation where buyer and seller test solution value against agreed success criteria in a defined scope.",
+          "Must include:",
+          "Defined scope",
+          "Defined success metrics",
+          "Defined stakeholders involved",
+          "Defined evaluation window",
+          "Without these you do not have a pilot.",
+          "You have an experiment drifting toward failure.",
+          "If this fails:",
+          "Budget discussion weakens",
+          "Confidence collapses",
+          "Internal momentum reverses",
+          "Deal often dies as “pilot inconclusive”",
+        ],
+      },
+      {
+        title: "Core Must-Win Mindset",
+        lines: [
+          "“Can I turn belief into evidence the buyer can defend internally?”",
+          "Not:",
+          "“How do I get them using the product?”",
+          "Wrong.",
+          "Pilot is not usage.",
+          "Pilot is proof.",
+        ],
+      },
+      {
+        title: "Buyer Reality (Alignment View)",
+        lines: [
+          "Buyer is thinking:",
+          "Will this actually deliver?",
+          "Will this create work for us?",
+          "What if results are weak?",
+          "Can I safely champion this after pilot?",
+          "They are not testing features.",
+          "They are testing:",
+          "Risk versus value.",
+        ],
+      },
+      {
+        title: "What Must Be True To Progress",
+        lines: [
+          "Must be true:",
+          "Success definition agreed",
+          "Evaluation scope controlled",
+          "Stakeholders aligned on what “good” looks like",
+          "Buyer sees credible path to measurable value",
+          "Seller must have:",
+          "Pilot structure",
+          "Success criteria",
+          "Support plan",
+          "Review motion",
+          "If weak:",
+          "pilot becomes chaos.",
+        ],
+      },
+    ],
+  },
+  {
+    title: "Budget Discussion",
+    sections: [
+      {
+        title: "Overview",
+        lines: [
+          "This is where many sellers panic and start negotiating against themselves.",
+          "Huge mistake.",
+          "This stage is not:",
+          "“Talking about price.”",
+          "It is:",
+          "Converting proven value into economic justification.",
+          "If you reduce this stage to pricing you shrink your own deal.",
+        ],
+      },
+      {
+        title: "Definition",
+        lines: [
+          "Budget Discussion is the process where buyer and seller align on whether the value established justifies investment, how that investment will be funded, and what commercial structure can support purchase.",
+          "This includes:",
+          "Economic justification",
+          "Budget reality",
+          "Pricing structure",
+          "Commercial negotiation",
+          "If this fails:",
+          "Proven value may still not get funded",
+          "Deal may stall in “no budget”",
+          "Procurement may never begin",
+          "Deal dies as commercial misalignment",
+        ],
+      },
+      {
+        title: "Core Must-Win Mindset",
+        lines: [
+          "“Can I help the buyer justify investment — not just defend price?”",
+          "Not:",
+          "“How do I get them to accept my number?”",
+          "Wrong.",
+          "That is reactive selling.",
+          "This is value defense.",
+        ],
+      },
+      {
+        title: "Buyer Reality (Alignment View)",
+        lines: [
+          "Buyer is thinking:",
+          "Is this worth spending on?",
+          "Can I justify this internally?",
+          "Is this the right use of limited budget?",
+          "What risk exists if I overpay or choose wrong?",
+          "They are evaluating:",
+          "Value vs cost",
+          "Funding feasibility",
+          "Internal approval risk",
+          "Not just price.",
+        ],
+      },
+      {
+        title: "What Must Be True To Progress",
+        lines: [
+          "Must be true:",
+          "Value clearly established",
+          "Buyer sees economic logic",
+          "Budget path exists or can be created",
+          "Commercial expectations broadly align",
+          "Seller must have:",
+          "Value anchor",
+          "Budget understanding",
+          "Pricing logic",
+          "Negotiation discipline",
+          "If weak:",
+          "deal enters discount spiral.",
+        ],
+      },
+    ],
+  },
+  {
+    title: "Procurement",
+    sections: [
+      {
+        title: "Overview",
+        lines: [
+          "This is where many reps make a fatal assumption:",
+          "“The deal is basically done.”",
+          "Wrong.",
+          "This is where “approved deals” die.",
+          "Not because buyer changed mind.",
+          "Because process friction killed momentum.",
+          "Procurement is not paperwork.",
+          "It is a risk-control system.",
+          "Treat it casually and you lose signed business.",
+        ],
+      },
+      {
+        title: "Definition",
+        lines: [
+          "Procurement is the structured process where a buyer organization converts commercial intent into contractual commitment through legal, compliance, security, vendor onboarding, and purchasing controls.",
+          "This includes:",
+          "Vendor onboarding",
+          "Legal review",
+          "Security / compliance review",
+          "Final commercial terms execution",
+          "If this fails:",
+          "Deal delays indefinitely",
+          "Internal momentum decays",
+          "Approval can be re-questioned",
+          "Deal dies as process attrition",
+        ],
+      },
+      {
+        title: "Core Must-Win Mindset",
+        lines: [
+          "“Can I keep decision momentum alive while helping the buyer clear internal risk controls?”",
+          "Not:",
+          "“How fast can contracts get signed?”",
+          "Wrong.",
+          "This is not admin work.",
+          "This is momentum protection.",
+        ],
+      },
+      {
+        title: "Buyer Reality (Alignment View)",
+        lines: [
+          "Buyer is thinking:",
+          "Will procurement block this?",
+          "Will legal raise issues?",
+          "Could this become painful internally?",
+          "Will I regret pushing this through?",
+          "They are protecting:",
+          "Compliance risk",
+          "Internal process credibility",
+          "Personal political exposure",
+          "This is still risk management.",
+          "Not a done deal.",
+        ],
+      },
+      {
+        title: "What Must Be True To Progress",
+        lines: [
+          "Must be true:",
+          "Process path understood",
+          "Major compliance risks manageable",
+          "Commercial terms close to final",
+          "Champion still engaged through process",
+          "Seller must have:",
+          "Process readiness",
+          "Response discipline",
+          "Internal coordination",
+          "Momentum management",
+          "If weak:",
+          "deal slows and can die.",
+        ],
+      },
+    ],
+  },
+  {
+    title: "Close",
+    sections: [
+      {
+        title: "Overview",
+        lines: [
+          "This is where intent becomes commitment.",
+          "Not “verbal yes.”",
+          "Not “contract sent.”",
+          "Not “looks done.”",
+          "Close means the buyer has made an enforceable commitment and momentum is transferred into successful execution.",
+          "Many reps think close is the finish line.",
+          "Wrong.",
+          "Close is where bad deals get exposed.",
+          "Because if commitment is weak it can still unravel.",
+        ],
+      },
+      {
+        title: "Definition",
+        lines: [
+          "Close is the process of converting approved, contracted intent into confirmed commitment, securing the deal operationally, and ensuring a clean handoff into delivery so the decision holds.",
+          "This includes:",
+          "Final commitment confirmation",
+          "Signature completion",
+          "Mutual expectation alignment",
+          "Internal handoff / launch readiness",
+          "If this fails:",
+          "Signed deal can still stall",
+          "Buyer remorse can emerge",
+          "Implementation can wobble",
+          "“Won” deal can become dead revenue",
+        ],
+      },
+      {
+        title: "Core Must-Win Mindset",
+        lines: [
+          "“Can I secure commitment in a way that sticks after signature?”",
+          "Not:",
+          "“How do I get the paper signed?”",
+          "Too small.",
+          "Close is commitment durability.",
+        ],
+      },
+      {
+        title: "Buyer Reality (Alignment View)",
+        lines: [
+          "Even at close, buyer may still think:",
+          "Did we make right choice?",
+          "What happens next?",
+          "Will execution go smoothly?",
+          "Am I exposed if this goes wrong?",
+          "This is often quiet anxiety.",
+          "The sale is not emotionally finished.",
+          "Buyer is still validating the decision.",
+        ],
+      },
+      {
+        title: "What Must Be True To Progress",
+        lines: [
+          "Must be true:",
+          "Contract executed",
+          "Decision remains supported internally",
+          "Expectations aligned for what happens next",
+          "Transition to delivery is credible",
+          "Seller must have:",
+          "Close control",
+          "Commitment confirmation",
+          "Handoff readiness",
+          "Post-signature confidence reinforcement",
+          "If weak:",
+          "closed deal can decay.",
+        ],
       },
     ],
   },

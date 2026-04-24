@@ -6,7 +6,7 @@ describe("Home", () => {
     render(<Home />);
 
     expect(
-      screen.getByRole("heading", { name: /contact/i })
+      screen.getByRole("heading", { level: 1, name: /^contact$/i })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: /guardrails/i })

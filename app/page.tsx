@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Compass, Lightbulb, Microscope, Search, ShieldAlert } from "lucide-react";
+import { ChevronDown, Compass, Lightbulb, Microscope, Search, ShieldAlert } from "lucide-react";
 import {
   bestPractices,
   constructionTracks,
   guardrails,
   layers,
   mockSteps,
+  momentumDefinitions,
   momentumSteps,
 } from "@/components/playbook/data";
 import { ContentSection } from "@/components/playbook/content-section";
@@ -16,6 +17,119 @@ import { MockStep } from "@/components/playbook/mock-step";
 import { CircleNav, NavButton } from "@/components/playbook/nav-buttons";
 import { StepItem } from "@/components/playbook/step-item";
 import { TopBar } from "@/components/playbook/top-bar";
+
+type DefinitionBlock =
+  | { type: "paragraph"; text: string }
+  | { type: "label"; text: string }
+  | { type: "list"; items: string[] };
+
+const definitionLabelLines = new Set([
+  "Contact means:",
+  "If this fails:",
+  "Not:",
+  "You need:",
+  "They are protecting:",
+  "They are not asking:",
+  "They are asking:",
+  "Buyer must believe at least one of these:",
+  "And seller must have:",
+  "Interest means:",
+  "Buyer is thinking:",
+  "Buyer is evaluating:",
+  "Buyer must believe:",
+  "Seller must have:",
+  "This is where the buyer moves from:",
+  "to",
+  "The question is not:",
+  "It is:",
+  "Must include:",
+  "They are not testing features.",
+  "They are testing:",
+  "This stage is not:",
+  "It is:",
+  "This includes:",
+  "Champion:",
+  "Internal path is:",
+  "Finance:",
+  "Technical:",
+  "Users:",
+  "Executive:",
+  "Your job:",
+  "Must be true:",
+  "Every stakeholder is asking different questions.",
+  "Procurement is not paperwork.",
+  "They are protecting:",
+  "Even at close, buyer may still think:",
+]);
+
+function isBulletCandidate(line: string) {
+  return (
+    !line.endsWith(".") &&
+    !line.endsWith("?") &&
+    !line.endsWith("!") &&
+    !line.endsWith(":") &&
+    !line.includes("“") &&
+    line.length < 80
+  );
+}
+
+function buildDefinitionBlocks(lines: string[]): DefinitionBlock[] {
+  const blocks: DefinitionBlock[] = [];
+  let index = 0;
+
+  while (index < lines.length) {
+    const line = lines[index];
+
+    if (definitionLabelLines.has(line) || line.endsWith(":")) {
+      blocks.push({ type: "label", text: line });
+      index += 1;
+
+      const items: string[] = [];
+      while (index < lines.length) {
+        const nextLine = lines[index];
+        if (definitionLabelLines.has(nextLine) || nextLine.endsWith(":")) {
+          break;
+        }
+        if (!isBulletCandidate(nextLine)) {
+          break;
+        }
+        items.push(nextLine);
+        index += 1;
+      }
+
+      if (items.length > 0) {
+        blocks.push({ type: "list", items });
+      }
+      continue;
+    }
+
+    if (isBulletCandidate(line)) {
+      const items: string[] = [];
+      while (index < lines.length) {
+        const nextLine = lines[index];
+        if (
+          definitionLabelLines.has(nextLine) ||
+          nextLine.endsWith(":") ||
+          !isBulletCandidate(nextLine)
+        ) {
+          break;
+        }
+        items.push(nextLine);
+        index += 1;
+      }
+
+      if (items.length > 0) {
+        blocks.push({ type: "list", items });
+        continue;
+      }
+    }
+
+    blocks.push({ type: "paragraph", text: line });
+    index += 1;
+  }
+
+  return blocks;
+}
 
 export default function Home() {
   const [constructionEnabled, setConstructionEnabled] = useState(false);
@@ -33,7 +147,7 @@ export default function Home() {
   const topStepRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const subRailRef = useRef<HTMLDivElement | null>(null);
   const subStepRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const constructionAnchorRef = useRef<HTMLSpanElement | null>(null);
+  const momentumSubstepSectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const [topLine, setTopLine] = useState({ left: 18, right: 18, linkLeft: 0 });
   const [subLine, setSubLine] = useState({ left: 18, right: 18 });
   const [subRowOffset, setSubRowOffset] = useState(0);
@@ -45,6 +159,26 @@ export default function Home() {
     activeMomentumStep.substeps[
       Math.min(activeMomentumSubstepIndex, activeMomentumStep.substeps.length - 1)
     ];
+  const activeMomentumDefinition = momentumDefinitions[activeMomentumStepIndex];
+
+  const handleMomentumSubstepSelect = (index: number) => {
+    setActiveSubstepByMomentum((current) => ({
+      ...current,
+      [activeMomentumStepIndex]: index,
+    }));
+
+    const substep = activeMomentumStep.substeps[index];
+    if (!substep) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      momentumSubstepSectionRefs.current[substep.id]?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  };
 
   const activeConstructionTrack = constructionTracks[activeConstructionTrackIndex];
   const activeConstructionOverlayIndex = activeOverlayByTrack[activeConstructionTrackIndex] ?? 0;
@@ -55,11 +189,52 @@ export default function Home() {
         activeConstructionTrack.overlays.length - 1
       )
     ];
+  const visibleConstructionOverlays = useMemo(() => {
+    const items: Array<{
+      key: string;
+      label: string;
+      source: "prev" | "current" | "next";
+      overlayIndex: number;
+    }> = [];
+
+    const previousTrack = constructionTracks[activeConstructionTrackIndex - 1];
+    const nextTrack = constructionTracks[activeConstructionTrackIndex + 1];
+
+    if (previousTrack && previousTrack.overlays.length > 0) {
+      const prevIndex = previousTrack.overlays.length - 1;
+      items.push({
+        key: `${previousTrack.id}-prev-${prevIndex}`,
+        label: previousTrack.overlays[prevIndex],
+        source: "prev",
+        overlayIndex: prevIndex,
+      });
+    }
+
+    activeConstructionTrack.overlays.forEach((overlay, index) => {
+      items.push({
+        key: `${activeConstructionTrack.id}-current-${index}`,
+        label: overlay,
+        source: "current",
+        overlayIndex: index,
+      });
+    });
+
+    if (nextTrack && nextTrack.overlays.length > 0) {
+      items.push({
+        key: `${nextTrack.id}-next-0`,
+        label: nextTrack.overlays[0],
+        source: "next",
+        overlayIndex: 0,
+      });
+    }
+
+    return items;
+  }, [activeConstructionTrack, activeConstructionTrackIndex]);
 
   const stepperItems = useMemo(() => {
     if (constructionEnabled) {
       return constructionTracks.map((track, index) => ({
-        label: `${track.id}. ${track.label === "Pre-Contact" ? "Other" : track.label}`,
+        label: `${track.id}. ${track.label === "Pre-Contact" ? "Pre-Contact" : track.label}`,
         active: index === activeConstructionTrackIndex,
         onClick: () => {
           setActiveConstructionTrackIndex(index);
@@ -95,16 +270,39 @@ export default function Home() {
     constructionEnabled
       ? activeConstructionTrack.overlays.length
       : momentumSteps.length;
+  const canGoToPreviousConstructionOverlay =
+    activeConstructionOverlayIndex > 0 || activeConstructionTrackIndex > 0;
+  const canGoToNextConstructionOverlay =
+    activeConstructionOverlayIndex < activeConstructionTrack.overlays.length - 1 ||
+    activeConstructionTrackIndex < constructionTracks.length - 1;
 
   const handlePrev = () => {
     if (constructionEnabled) {
-      setActiveOverlayByTrack((current) => ({
-        ...current,
-        [activeConstructionTrackIndex]: Math.max(
-          (current[activeConstructionTrackIndex] ?? 0) - 1,
-          0
-        ),
-      }));
+      if (activeConstructionOverlayIndex > 0) {
+        setActiveOverlayByTrack((current) => ({
+          ...current,
+          [activeConstructionTrackIndex]: Math.max(
+            (current[activeConstructionTrackIndex] ?? 0) - 1,
+            0
+          ),
+        }));
+        return;
+      }
+
+      if (activeConstructionTrackIndex > 0) {
+        const previousTrackIndex = activeConstructionTrackIndex - 1;
+        const previousTrack = constructionTracks[previousTrackIndex];
+
+        setActiveConstructionTrackIndex(previousTrackIndex);
+        if (previousTrackIndex > 0) {
+          setActiveMomentumStepIndex(previousTrackIndex - 1);
+        }
+        setActiveOverlayByTrack((current) => ({
+          ...current,
+          [previousTrackIndex]: previousTrack.overlays.length - 1,
+        }));
+      }
+
       return;
     }
 
@@ -113,13 +311,30 @@ export default function Home() {
 
   const handleNext = () => {
     if (constructionEnabled) {
-      setActiveOverlayByTrack((current) => ({
-        ...current,
-        [activeConstructionTrackIndex]: Math.min(
-          (current[activeConstructionTrackIndex] ?? 0) + 1,
-          activeConstructionTrack.overlays.length - 1
-        ),
-      }));
+      if (activeConstructionOverlayIndex < activeConstructionTrack.overlays.length - 1) {
+        setActiveOverlayByTrack((current) => ({
+          ...current,
+          [activeConstructionTrackIndex]: Math.min(
+            (current[activeConstructionTrackIndex] ?? 0) + 1,
+            activeConstructionTrack.overlays.length - 1
+          ),
+        }));
+        return;
+      }
+
+      if (activeConstructionTrackIndex < constructionTracks.length - 1) {
+        const nextTrackIndex = activeConstructionTrackIndex + 1;
+
+        setActiveConstructionTrackIndex(nextTrackIndex);
+        if (nextTrackIndex > 0) {
+          setActiveMomentumStepIndex(nextTrackIndex - 1);
+        }
+        setActiveOverlayByTrack((current) => ({
+          ...current,
+          [nextTrackIndex]: 0,
+        }));
+      }
+
       return;
     }
 
@@ -152,13 +367,17 @@ export default function Home() {
       }
 
       const subRail = subRailRef.current;
-      const anchor = constructionAnchorRef.current;
       const subButtons = subStepRefs.current.filter(Boolean) as HTMLButtonElement[];
 
-      if (constructionEnabled && subRail && anchor) {
+      if (constructionEnabled && subRail) {
         const firstSub = subButtons[0];
         const lastSub = subButtons[subButtons.length - 1];
-        const activeSub = subButtons[activeConstructionOverlayIndex];
+        const activeVisibleOverlayIndex = visibleConstructionOverlays.findIndex(
+          (overlay) =>
+            overlay.source === "current" &&
+            overlay.overlayIndex === activeConstructionOverlayIndex
+        );
+        const activeSub = subButtons[activeVisibleOverlayIndex];
         const activeTop = topButtons[activeConstructionTrackIndex];
         let nextSubRowOffset = 0;
 
@@ -172,7 +391,7 @@ export default function Home() {
         }
 
         setSubLine({
-          left: anchor.offsetLeft + anchor.offsetWidth - 18,
+          left: firstSub ? Math.max(firstSub.offsetLeft - 18, 18) : 18,
           right: firstSub && lastSub
             ? subRail.scrollWidth - (lastSub.offsetLeft + lastSub.offsetWidth - 18)
             : 18,
@@ -210,6 +429,7 @@ export default function Home() {
     stepperItems.length,
     activeConstructionOverlayIndex,
     activeConstructionTrack.overlays.length,
+    visibleConstructionOverlays,
   ]);
 
   useEffect(() => {
@@ -227,15 +447,21 @@ export default function Home() {
       activeTop.offsetLeft - viewport.clientWidth / 2 + activeTop.offsetWidth / 2;
     const maxScrollLeft = Math.max(topStepsRow.scrollWidth - viewport.clientWidth, 0);
 
-    viewport.scrollTo({
-      left: Math.min(Math.max(targetLeft, 0), maxScrollLeft),
-      behavior: "smooth",
-    });
+    const left = Math.min(Math.max(targetLeft, 0), maxScrollLeft);
+    if (typeof viewport.scrollTo === "function") {
+      viewport.scrollTo({
+        left,
+        behavior: "smooth",
+      });
+      return;
+    }
+
+    viewport.scrollLeft = left;
   }, [activeConstructionTrackIndex, activeMomentumStepIndex, constructionEnabled]);
 
   return (
     <main className="min-h-screen bg-white px-0 text-[#1f2333]">
-      <div className="mx-auto max-w-[2010px] overflow-hidden bg-white">
+      <div className="mx-auto max-w-[2010px] bg-white">
         <TopBar />
 
         <section className="border-b border-[#ece9f6] bg-[radial-gradient(circle_at_top,#f3f0ff_0%,#ffffff_62%)] px-4 py-8 sm:px-6 sm:py-10 lg:px-8 xl:px-12">
@@ -307,28 +533,60 @@ export default function Home() {
                       }}
                     />
                     <div className="flex items-center gap-3 sm:gap-4">
-                      <span
-                        ref={constructionAnchorRef}
-                        className="relative z-10 rounded-full border border-[#ddd7e9] bg-white px-3 py-1.5 text-[13px] font-medium text-[#697086] sm:px-4 sm:py-2 sm:text-[15px]"
-                      >
-                        • Construction
-                      </span>
-                      {activeConstructionTrack.overlays.map((overlay, index) => (
+                      {visibleConstructionOverlays.map((overlay) => (
                         <StepItem
-                          key={`${activeConstructionTrack.id}-${overlay}`}
+                          key={overlay.key}
                           ref={(node) => {
-                            subStepRefs.current[index] = node;
+                            const itemIndex = visibleConstructionOverlays.findIndex(
+                              (item) => item.key === overlay.key
+                            );
+                            subStepRefs.current[itemIndex] = node;
                           }}
-                          label={`• ${overlay}`}
-                          active={index === activeConstructionOverlayIndex}
+                          label={`• ${overlay.label}`}
+                          active={
+                            overlay.source === "current" &&
+                            overlay.overlayIndex === activeConstructionOverlayIndex
+                          }
                           activeStyle="outline"
                           className="relative z-10 px-4"
-                          onClick={() =>
+                          onClick={() => {
+                            if (overlay.source === "prev") {
+                              const previousTrackIndex = Math.max(
+                                activeConstructionTrackIndex - 1,
+                                0
+                              );
+                              setActiveConstructionTrackIndex(previousTrackIndex);
+                              setActiveMomentumStepIndex(
+                                Math.max(previousTrackIndex - 1, 0)
+                              );
+                              setActiveOverlayByTrack((current) => ({
+                                ...current,
+                                [previousTrackIndex]: overlay.overlayIndex,
+                              }));
+                              return;
+                            }
+
+                            if (overlay.source === "next") {
+                              const nextTrackIndex = Math.min(
+                                activeConstructionTrackIndex + 1,
+                                constructionTracks.length - 1
+                              );
+                              setActiveConstructionTrackIndex(nextTrackIndex);
+                              if (nextTrackIndex > 0) {
+                                setActiveMomentumStepIndex(nextTrackIndex - 1);
+                              }
+                              setActiveOverlayByTrack((current) => ({
+                                ...current,
+                                [nextTrackIndex]: overlay.overlayIndex,
+                              }));
+                              return;
+                            }
+
                             setActiveOverlayByTrack((current) => ({
                               ...current,
-                              [activeConstructionTrackIndex]: index,
-                            }))
-                          }
+                              [activeConstructionTrackIndex]: overlay.overlayIndex,
+                            }));
+                          }}
                         />
                       ))}
                     </div>
@@ -372,8 +630,8 @@ export default function Home() {
           <div className="mx-auto max-w-[1520px]">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
               {!constructionEnabled ? (
-                <aside className="w-full shrink-0 lg:w-[340px]">
-                  <div className="rounded-[20px] border border-[#e7e0ed] bg-white p-4 shadow-[0_12px_28px_rgba(31,35,51,0.05)] sm:rounded-[24px] sm:p-6">
+                <aside className="w-full shrink-0 lg:sticky lg:top-4 lg:w-[340px] lg:self-start">
+                  <div className="rounded-[20px] border border-[#e7e0ed] bg-white p-4 shadow-[0_12px_28px_rgba(31,35,51,0.05)] sm:rounded-[24px] sm:p-6 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
                     <div className="flex items-start gap-4">
                       <div className="flex h-[40px] w-[40px] items-center justify-center rounded-[12px] bg-[linear-gradient(180deg,#5f56f3_0%,#4f46e5_100%)] text-white shadow-[0_14px_32px_rgba(95,86,243,0.24)] sm:h-[44px] sm:w-[44px]">
                         <Compass className="h-[18px] w-[18px] sm:h-[20px] sm:w-[20px]" strokeWidth={2.2} />
@@ -401,12 +659,7 @@ export default function Home() {
                             <div key={substep.id}>
                               <button
                                 type="button"
-                                onClick={() =>
-                                  setActiveSubstepByMomentum((current) => ({
-                                    ...current,
-                                    [activeMomentumStepIndex]: index,
-                                  }))
-                                }
+                                onClick={() => handleMomentumSubstepSelect(index)}
                                 className={[
                                   "flex w-full items-center justify-between rounded-[14px] px-3 py-2.5 text-left transition sm:rounded-[16px] sm:px-4 sm:py-3",
                                   isActive
@@ -443,7 +696,7 @@ export default function Home() {
                 </aside>
               ) : null}
 
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 lg:pr-3">
                 <div className="flex flex-col gap-5 border-b border-[#ece9f6] pb-8 sm:gap-6 sm:pb-10 lg:flex-row lg:items-end lg:justify-between">
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6f5cff] sm:gap-3 sm:text-[12px] sm:tracking-[0.22em]">
@@ -476,12 +729,20 @@ export default function Home() {
                   <div className="flex items-center gap-2 self-start lg:self-auto">
                     <NavButton
                       direction="prev"
-                      disabled={currentPrimaryIndex === 0}
+                      disabled={
+                        constructionEnabled
+                          ? !canGoToPreviousConstructionOverlay
+                          : currentPrimaryIndex === 0
+                      }
                       onClick={handlePrev}
                     />
                     <NavButton
                       direction="next"
-                      disabled={currentPrimaryIndex === currentPrimaryLength - 1}
+                      disabled={
+                        constructionEnabled
+                          ? !canGoToNextConstructionOverlay
+                          : currentPrimaryIndex === currentPrimaryLength - 1
+                      }
                       onClick={handleNext}
                     />
                   </div>
@@ -489,25 +750,171 @@ export default function Home() {
 
                 <div className="space-y-8 py-8 sm:space-y-10 sm:py-10 lg:space-y-12">
                   <section className="rounded-[16px] border border-[#e3dbf6] bg-[#efebff] px-4 py-4 text-[13px] leading-[1.8] text-[#4a4f63] sm:rounded-[20px] sm:px-7 sm:py-6 sm:text-[15px] sm:leading-[1.95]">
-                    <p>
-                      Discovery is where you move from surface-level conversation to
-                      real business understanding. This is not about asking questions
-                      for the sake of it. It&apos;s about diagnosing a problem deeply
-                      enough that both you and the buyer clearly understand
-                      what&apos;s broken, why it matters, and what happens if nothing
-                      changes.
-                    </p>
-                    <p>
-                      In strong enterprise deals, discovery is where momentum is
-                      either created or permanently lost. If you stay shallow, the
-                      deal becomes a feature comparison later. If you go deep, you
-                      shape how the buyer thinks about the problem and that gives
-                      you control over the deal.
-                    </p>
-                    <p>
-                      Your job here is to uncover context, pain, impact, urgency,
-                      and personal stakes, not just requirements.
-                    </p>
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <h2 className="text-[18px] font-semibold tracking-[-0.03em] text-[#1a2130] sm:text-[22px]">
+                          {activeMomentumDefinition.title}
+                        </h2>
+                      </div>
+
+                      {activeMomentumDefinition.sections.map((section) => (
+                        <div key={section.title} className="space-y-2.5">
+                          <h3 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#5d54d6] sm:text-[13px]">
+                            {section.title}
+                          </h3>
+                          <div className="space-y-1.5">
+                            {buildDefinitionBlocks(section.lines).map((block, index) => {
+                              if (block.type === "paragraph") {
+                                return (
+                                  <p
+                                    key={`${section.title}-${index}`}
+                                    className="text-[#4a4f63]"
+                                  >
+                                    {block.text}
+                                  </p>
+                                );
+                              }
+
+                              if (block.type === "label") {
+                                return (
+                                  <p
+                                    key={`${section.title}-${index}`}
+                                    className="pt-1 font-semibold text-[#2d3345]"
+                                  >
+                                    {block.text}
+                                  </p>
+                                );
+                              }
+
+                              return (
+                                <ul
+                                  key={`${section.title}-${index}`}
+                                  className="space-y-1.5 pl-5 text-[#4a4f63]"
+                                >
+                                  {block.items.map((item) => (
+                                    <li key={item} className="list-disc">
+                                      {item}
+                                    </li>
+                                  ))}
+                                </ul>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="space-y-6 scroll-mt-24" id={`step-${activeMomentumStep.id}-substeps`}>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#ece9f6] bg-[#fbfbfd] text-[#4c5268]">
+                        <Compass className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h2 className="text-[28px] font-semibold tracking-[-0.04em] text-[#1b2030] sm:text-[34px]">
+                          {activeMomentumStep.label} substeps
+                        </h2>
+                        {/* <p className="mt-1 text-sm text-[#72788c] sm:text-[15px]">
+                          Click any substep in the sidebar to jump directly to its section.
+                        </p> */}
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      {activeMomentumStep.substeps.map((substep, index) => {
+                        const isActive = index === activeMomentumSubstepIndex;
+                        const isOpen = isActive;
+                        const contentLines = substep.details?.length
+                          ? substep.details
+                          : substep.bullets;
+
+                        return (
+                          <section
+                            key={substep.id}
+                            id={`substep-${substep.id}`}
+                            ref={(node) => {
+                              momentumSubstepSectionRefs.current[substep.id] = node;
+                            }}
+                            className={[
+                              "scroll-mt-28 rounded-[20px] border bg-white px-5 py-5 shadow-[0_10px_26px_rgba(31,35,51,0.04)] sm:px-6 sm:py-6",
+                              isActive
+                                ? "border-[#7a6cff] shadow-[0_14px_32px_rgba(111,92,255,0.12)]"
+                                : "border-[#ece9f6]",
+                            ].join(" ")}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => handleMomentumSubstepSelect(index)}
+                              className="flex w-full items-start justify-between gap-4 text-left"
+                            >
+                              <div>
+                                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7b8092] sm:text-[12px]">
+                                  Substep {substep.id}
+                                </div>
+                                <h3 className="mt-1 text-[20px] font-semibold tracking-[-0.03em] text-[#1a2130] sm:text-[24px]">
+                                  {substep.title}
+                                </h3>
+                              </div>
+
+                              <div className="flex items-center gap-3">
+                                <span
+                                  className={[
+                                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition",
+                                    isOpen
+                                      ? "border-[#d8cffb] bg-[#f5f1ff] text-[#6f5cff]"
+                                      : "border-[#ece9f6] bg-[#fbfbfd] text-[#8b90a2]",
+                                  ].join(" ")}
+                                  aria-hidden="true"
+                                >
+                                  <ChevronDown
+                                    className={[
+                                      "h-4 w-4 transition-transform",
+                                      isOpen ? "rotate-180" : "",
+                                    ].join(" ")}
+                                  />
+                                </span>
+                              </div>
+                            </button>
+
+                            {isOpen ? (
+                              <div className="mt-4 space-y-2.5 border-t border-[#f0ebfa] pt-4 text-[14px] leading-7 text-[#555b70] sm:text-[15px]">
+                                {buildDefinitionBlocks(contentLines).map((block, blockIndex) => {
+                                  if (block.type === "paragraph") {
+                                    return (
+                                      <p key={`${substep.id}-${blockIndex}`}>{block.text}</p>
+                                    );
+                                  }
+
+                                  if (block.type === "label") {
+                                    return (
+                                      <p
+                                        key={`${substep.id}-${blockIndex}`}
+                                        className="pt-1 font-semibold text-[#2d3345]"
+                                      >
+                                        {block.text}
+                                      </p>
+                                    );
+                                  }
+
+                                  return (
+                                    <ul
+                                      key={`${substep.id}-${blockIndex}`}
+                                      className="space-y-1.5 pl-5 text-[#555b70]"
+                                    >
+                                      {block.items.map((item) => (
+                                        <li key={item} className="list-disc">
+                                          {item}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  );
+                                })}
+                              </div>
+                            ) : null}
+                          </section>
+                        );
+                      })}
+                    </div>
                   </section>
 
                   <ContentSection
@@ -571,7 +978,11 @@ export default function Home() {
                     <div className="flex items-center gap-4">
                       <CircleNav
                         direction="left"
-                        disabled={currentPrimaryIndex === 0}
+                        disabled={
+                          constructionEnabled
+                            ? !canGoToPreviousConstructionOverlay
+                            : currentPrimaryIndex === 0
+                        }
                         onClick={handlePrev}
                       />
                       <div className="space-y-1">
@@ -601,7 +1012,11 @@ export default function Home() {
                       </div>
                       <CircleNav
                         direction="right"
-                        disabled={currentPrimaryIndex === currentPrimaryLength - 1}
+                        disabled={
+                          constructionEnabled
+                            ? !canGoToNextConstructionOverlay
+                            : currentPrimaryIndex === currentPrimaryLength - 1
+                        }
                         onClick={handleNext}
                       />
                     </div>
