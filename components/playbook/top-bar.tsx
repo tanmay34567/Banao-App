@@ -2,7 +2,7 @@ import { Search } from "lucide-react";
 
 export function TopBar() {
   return (
-    <header className="border-b border-[#ece9f6] bg-white px-4 py-4 sm:px-6 lg:px-8 xl:px-12">
+    <header className="border-b border-[#ece9f6] bg-white px-4 py-3 sm:px-6 sm:py-4 lg:px-8 xl:px-12">
       <div className="mx-auto flex max-w-[1520px] flex-wrap items-center justify-between gap-3 md:grid md:grid-cols-[auto_1fr_auto] md:gap-4">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-3">
@@ -13,7 +13,7 @@ export function TopBar() {
           </div>
         </div>
 
-        <nav className="order-3 hidden items-center justify-center gap-8 text-sm font-medium text-[#8b90a2] md:order-none md:flex">
+        <nav className="order-3 hidden items-center justify-center gap-6 text-sm font-medium text-[#8b90a2] lg:order-none lg:flex">
           <a href="#playbook" className="transition hover:text-[#252a3d]">
             Playbook
           </a>
@@ -29,7 +29,7 @@ export function TopBar() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="flex h-9 min-w-[150px] items-center gap-2 rounded-full border border-[#ece9f6] bg-white px-3 text-sm text-[#8b90a2] shadow-sm sm:min-w-[220px]">
+          <div className="flex h-9 min-w-0 max-w-[190px] items-center gap-2 rounded-full border border-[#ece9f6] bg-white px-3 text-sm text-[#8b90a2] shadow-sm sm:max-w-none sm:min-w-[220px]">
             <Search className="h-3.5 w-3.5" />
             <span className="flex-1 truncate">Search playbook</span>
             <span className="hidden rounded-md border border-[#ece9f6] px-1.5 py-0.5 text-[10px] font-semibold text-[#8f93a7] sm:inline-flex">

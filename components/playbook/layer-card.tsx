@@ -3,6 +3,7 @@ import type { PlaybookIcon } from "@/components/playbook/icons";
 type LayerCardProps = {
   id: string;
   title: string;
+  description: string;
   icon: PlaybookIcon;
   active: boolean;
   onClick: () => void;
@@ -11,6 +12,7 @@ type LayerCardProps = {
 export function LayerCard({
   id,
   title,
+  description,
   icon: Icon,
   active,
   onClick,
@@ -20,35 +22,45 @@ export function LayerCard({
       type="button"
       onClick={onClick}
       className={[
-        "relative min-w-[260px] rounded-[18px] border bg-white px-4 py-3 text-left transition hover:-translate-y-0.5 sm:min-w-[320px] sm:rounded-[20px] sm:px-5 sm:py-3.5",
+        "flex min-w-[280px] items-center justify-between rounded-[18px] border bg-white px-4 py-3.5 text-left transition hover:border-[#cbc0ff] sm:min-w-[340px] sm:px-5 sm:py-4 md:min-w-[420px] md:rounded-[20px] md:px-6 md:py-4.5",
         active
-          ? "border-[#ddd8ea] shadow-[0_12px_30px_rgba(98,84,206,0.06)]"
-          : "border-[#ece9f6] shadow-[0_8px_24px_rgba(82,66,170,0.03)]",
+          ? "border-[#cdc4ff] shadow-[0_10px_25px_rgba(120,106,252,0.08)]"
+          : "border-[#e8e2ef] shadow-[0_8px_20px_rgba(31,35,51,0.04)]",
       ].join(" ")}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 items-center gap-3 sm:gap-4">
         <div
           className={[
-            "flex h-9 w-9 items-center justify-center rounded-[12px] border sm:h-10 sm:w-10 sm:rounded-[14px]",
-            active
-              ? "border-[#23283a] bg-[#1f2433] text-white"
-              : "border-[#edeaf2] bg-[#f4f1ef] text-[#5e6476]",
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] sm:h-11 sm:w-11 sm:rounded-[16px]",
+            active ? "bg-[#151b2b] text-white" : "bg-[#f5f2f0] text-[#767b8d]",
           ].join(" ")}
         >
-          <Icon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
         </div>
-        <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6d7385]">
+        <div className="min-w-0">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#73788b] sm:text-[11px] sm:tracking-[0.22em]">
             Layer {id}
           </div>
-          <div className="text-[15px] font-semibold leading-tight text-[#1d2230] sm:text-[16px]">
+          <div className="truncate text-[16px] font-semibold leading-tight text-[#171d2a] sm:text-[18px]">
             {title}
           </div>
+          <div className="text-xs text-[#8b90a2] sm:text-sm">{description}</div>
         </div>
       </div>
-      {active ? (
-        <div className="absolute bottom-0 left-3 right-3 h-[3px] rounded-full bg-[#6f5cff] sm:left-4 sm:right-4" />
-      ) : null}
+
+      <div
+        className={[
+          "relative h-7 w-[48px] shrink-0 rounded-full transition sm:h-8 sm:w-[54px]",
+          active ? "bg-[#8a7cff]" : "bg-[#ecebf1]",
+        ].join(" ")}
+      >
+        <div
+          className={[
+            "absolute top-1 h-5 w-5 rounded-full bg-white shadow-[0_4px_10px_rgba(23,29,42,0.18)] transition sm:h-6 sm:w-6",
+            active ? "left-[23px] sm:left-[26px]" : "left-1",
+          ].join(" ")}
+        />
+      </div>
     </button>
   );
 }

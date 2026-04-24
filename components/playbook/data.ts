@@ -1,11 +1,29 @@
-import { Brain, Briefcase, Gauge, ShieldX } from "lucide-react";
+import { Briefcase } from "lucide-react";
 import { ActivityMark, type PlaybookIcon } from "@/components/playbook/icons";
 
 export type LayerDefinition = {
   id: string;
   title: string;
   icon: PlaybookIcon;
-  steps: string[];
+  description: string;
+};
+
+export type MomentumSubstep = {
+  id: string;
+  title: string;
+  bullets: string[];
+};
+
+export type MomentumStep = {
+  id: string;
+  label: string;
+  substeps: MomentumSubstep[];
+};
+
+export type ConstructionTrack = {
+  id: string;
+  label: string;
+  overlays: string[];
 };
 
 export type AccordionItemData = {
@@ -22,104 +40,443 @@ export type MockStepData = {
 
 export const layers: LayerDefinition[] = [
   {
-    id: "01",
+    id: "momentum",
     title: "Deal Momentum",
+    description: "",
     icon: ActivityMark,
-    steps: [
-      "Contact",
-      "Interest",
-      "Discovery",
-      "Validation",
-      "Internal Discussion",
-      "Stakeholder Expansion",
-      "Pilot",
-      "Budget Discussion",
-      "Procurement",
-      "Close",
+  },
+  {
+    id: "construction",
+    title: "Deal Construction",
+    description: "",
+    icon: Briefcase,
+  },
+];
+
+export const momentumSteps: MomentumStep[] = [
+  {
+    id: "1",
+    label: "Contact",
+    substeps: [
+      {
+        id: "1.1",
+        title: "Contact Channels",
+        bullets: [
+          "Cold outbound (email / call / LinkedIn)",
+          "Social / warm outreach",
+          "Events / conferences",
+          "Referrals / introductions",
+          "Inbound",
+          "Existing relationships",
+        ],
+      },
+      {
+        id: "1.2",
+        title: "Persona Targeting",
+        bullets: [
+          "Right entry persona",
+          "Role vs influence vs access",
+          "Single-thread vs multi-thread",
+        ],
+      },
+      {
+        id: "1.3",
+        title: "Problem Hypothesis",
+        bullets: ["Expected problem", "Why this company", "Why this persona"],
+      },
+      {
+        id: "1.4",
+        title: "First Touch Execution",
+        bullets: [
+          "Problem-first messaging",
+          "Channel-specific execution",
+          "Call vs async nuance",
+        ],
+      },
+      {
+        id: "1.5",
+        title: "Follow-up System",
+        bullets: ["Multi-touch sequence", "Message variation", "Stop vs persist"],
+      },
+      {
+        id: "1.6",
+        title: "Contact Qualification",
+        bullets: [
+          "Real vs fake signal",
+          "Response vs engagement vs intent",
+          "Early disqualification",
+        ],
+      },
     ],
   },
   {
-    id: "02",
-    title: "Deal Construction",
-    icon: Briefcase,
-    steps: [
-      "Worldview",
-      "Industry Forces",
-      "ICP",
-      "Persona",
-      "Trigger",
-      "Pain",
-      "Stakes",
-      "Champion",
-      "Stakeholders",
-      "Access",
-      "Discovery",
-      "Problem Depth",
-      "Value Hypothesis",
-      "Solution Shaping",
+    id: "2",
+    label: "Interest",
+    substeps: [
+      {
+        id: "2.1",
+        title: "Signal Validation",
+        bullets: ["Politeness vs real interest", "Passive vs active engagement"],
+      },
+      {
+        id: "2.2",
+        title: "Curiosity Build",
+        bullets: ["Insight hooks", "Tension creation"],
+      },
+      {
+        id: "2.3",
+        title: "Conversation Framing",
+        bullets: ["Agenda setting", "Tone control"],
+      },
+      {
+        id: "2.4",
+        title: "Micro Qualification",
+        bullets: ["Relevance", "Ownership", "Urgency"],
+      },
+      {
+        id: "2.5",
+        title: "Transition to Discovery",
+        bullets: ["Secure time", "Set expectations"],
+      },
+    ],
+  },
+  {
+    id: "3",
+    label: "Discovery",
+    substeps: [
+      {
+        id: "3.1",
+        title: "Problem Mapping",
+        bullets: ["Surface problem", "Root cause", "Frequency"],
+      },
+      {
+        id: "3.2",
+        title: "Impact Quantification",
+        bullets: ["Business impact", "Personal impact"],
+      },
+      {
+        id: "3.3",
+        title: "Current State",
+        bullets: ["Existing solutions", "Gaps"],
+      },
+      {
+        id: "3.4",
+        title: "Urgency & Trigger",
+        bullets: ["Why now", "Cost of inaction"],
+      },
+      {
+        id: "3.5",
+        title: "Stakeholder Mapping",
+        bullets: ["Stakeholders involved", "Decision owner"],
+      },
+      {
+        id: "3.6",
+        title: "Qualification Depth",
+        bullets: ["Budget", "Authority", "Timeline"],
+      },
+      {
+        id: "3.7",
+        title: "Problem Reframing",
+        bullets: ["Sharpen problem clarity"],
+      },
+    ],
+  },
+  {
+    id: "4",
+    label: "Validation",
+    substeps: [
+      {
+        id: "4.1",
+        title: "Solution Mapping",
+        bullets: ["Use-case based demo"],
+      },
+      {
+        id: "4.2",
+        title: "Feature -> Problem Fit",
+        bullets: ["Map to discovery"],
+      },
+      {
+        id: "4.3",
+        title: "Objection Surfacing",
+        bullets: ["Confusion", "Skepticism", "Constraints"],
+      },
+      {
+        id: "4.4",
+        title: "Value Articulation",
+        bullets: ["Outcomes", "Before vs after"],
+      },
+      {
+        id: "4.5",
+        title: "Buyer Confirmation",
+        bullets: ["Problem solved acknowledgment"],
+      },
+    ],
+  },
+  {
+    id: "5",
+    label: "Internal Discussion",
+    substeps: [
+      {
+        id: "5.1",
+        title: "Champion Identification",
+        bullets: ["Internal owner"],
+      },
+      {
+        id: "5.2",
+        title: "Internal Narrative",
+        bullets: ["Problem story", "Value story"],
+      },
+      {
+        id: "5.3",
+        title: "Enablement Assets",
+        bullets: ["Decks", "One-pagers", "ROI summary"],
+      },
+      {
+        id: "5.4",
+        title: "Process Mapping",
+        bullets: ["Decision flow"],
+      },
+      {
+        id: "5.5",
+        title: "Pre-empt Objections",
+        bullets: ["Finance", "Tech", "Leadership"],
+      },
+    ],
+  },
+  {
+    id: "6",
+    label: "Stakeholder Expansion",
+    substeps: [
+      {
+        id: "6.1",
+        title: "Stakeholder Mapping",
+        bullets: ["Economic buyer", "Technical buyer", "Users", "Blockers"],
+      },
+      {
+        id: "6.2",
+        title: "Persona Messaging",
+        bullets: ["Tailored narratives"],
+      },
+      {
+        id: "6.3",
+        title: "Risk Mitigation",
+        bullets: ["Address concerns"],
+      },
+      {
+        id: "6.4",
+        title: "Consensus Building",
+        bullets: ["Align stakeholders"],
+      },
+    ],
+  },
+  {
+    id: "7",
+    label: "Pilot",
+    substeps: [
+      {
+        id: "7.1",
+        title: "Scope Definition",
+        bullets: ["Included vs excluded"],
+      },
+      {
+        id: "7.2",
+        title: "Success Metrics",
+        bullets: ["Measurable outcomes"],
+      },
+      {
+        id: "7.3",
+        title: "Execution Support",
+        bullets: ["High-touch support"],
+      },
+      {
+        id: "7.4",
+        title: "Progress Tracking",
+        bullets: ["Check-ins", "Reporting"],
+      },
+      {
+        id: "7.5",
+        title: "Outcome Evaluation",
+        bullets: ["Success vs failure"],
+      },
+    ],
+  },
+  {
+    id: "8",
+    label: "Budget Discussion",
+    substeps: [
+      {
+        id: "8.1",
+        title: "Value Anchoring",
+        bullets: ["ROI"],
+      },
+      {
+        id: "8.2",
+        title: "Pricing Structure",
+        bullets: ["Packages", "Tiers"],
+      },
+      {
+        id: "8.3",
+        title: "Budget Validation",
+        bullets: ["Availability", "Approval path"],
+      },
+      {
+        id: "8.4",
+        title: "Negotiation Handling",
+        bullets: ["Pushback"],
+      },
+    ],
+  },
+  {
+    id: "9",
+    label: "Procurement",
+    substeps: [
+      {
+        id: "9.1",
+        title: "Vendor Onboarding",
+        bullets: ["Documentation"],
+      },
+      {
+        id: "9.2",
+        title: "Legal Review",
+        bullets: ["Contracts", "Compliance"],
+      },
+      {
+        id: "9.3",
+        title: "Security Checks",
+        bullets: ["IT / data"],
+      },
+      {
+        id: "9.4",
+        title: "Final Negotiation",
+        bullets: ["Terms closure"],
+      },
+    ],
+  },
+  {
+    id: "10",
+    label: "Close",
+    substeps: [
+      {
+        id: "10.1",
+        title: "Agreement Signing",
+        bullets: ["Formal closure"],
+      },
+      {
+        id: "10.2",
+        title: "Implementation Planning",
+        bullets: ["Onboarding"],
+      },
+      {
+        id: "10.3",
+        title: "Stakeholder Alignment",
+        bullets: ["Roles"],
+      },
+      {
+        id: "10.4",
+        title: "Success Definition",
+        bullets: ["Metrics"],
+      },
+    ],
+  },
+];
+
+export const constructionTracks: ConstructionTrack[] = [
+  {
+    id: "0",
+    label: "Pre-Contact",
+    overlays: ["Worldview", "Industry forces", "ICP clarity"],
+  },
+  {
+    id: "1",
+    label: "Contact",
+    overlays: [
+      "Entry via channel",
+      "Problem hypothesis activation",
+      "Persona relevance check",
+    ],
+  },
+  {
+    id: "2",
+    label: "Interest",
+    overlays: [
+      "Persona understanding",
+      "Frame control",
+      "Trigger identification",
+      "Pain surface",
+      "Stakes tease",
+    ],
+  },
+  {
+    id: "3",
+    label: "Discovery",
+    overlays: [
+      "Context / problem / impact",
+      "Problem depth",
+      "Do-nothing cost",
+      "Value hypothesis",
+      "Stakeholder discovery",
+      "Commitment signal",
+    ],
+  },
+  {
+    id: "4",
+    label: "Validation",
+    overlays: [
+      "Solution shaping",
+      "Buyer self-recognition",
       "Differentiation",
       "Credibility",
-      "Champion Coaching",
-      "Stakeholder Expansion",
-      "Objection Surface",
-      "Objection Handling",
-      "Political Alignment",
-      "Risk Removal",
-      "Pilot/Test",
-      "Proof",
-      "ROI Case",
-      "Economic Buyer",
-      "Budget Path",
-      "Procurement",
-      "Negotiation",
-      "Decision Signal",
-      "Close",
-      "Expansion",
     ],
   },
   {
-    id: "03",
-    title: "Buyer Psychology",
-    icon: Brain,
-    steps: [
-      "Trigger",
-      "Pain Intensity",
-      "Personal Risk",
-      "Career Incentive",
-      "Budget Authority",
-      "Internal Politics",
-      "Status Protection",
-      "Consensus Building",
-      "Decision Momentum",
+    id: "5",
+    label: "Internal Discussion",
+    overlays: ["ROI establishment", "Champion coaching", "Narrative transfer"],
+  },
+  {
+    id: "6",
+    label: "Stakeholder Expansion",
+    overlays: [
+      "Stakeholder expansion",
+      "Persona narratives",
+      "Objection handling",
+      "Political alignment",
+      "Risk removal",
     ],
   },
   {
-    id: "04",
-    title: "Positive Deal Signals",
-    icon: Gauge,
-    steps: [
-      "Engagement",
-      "Stakeholders",
-      "Questions",
-      "Internal Sharing",
-      "Pilot Request",
-      "Budget Talk",
-      "Procurement Contact",
-      "Timeline Talk",
+    id: "7",
+    label: "Pilot",
+    overlays: [
+      "Pilot / test",
+      "Success metrics",
+      "Proof of value",
+      "ROI strengthening",
     ],
   },
   {
-    id: "05",
-    title: "Failure Diagnostics",
-    icon: ShieldX,
-    steps: [
-      "No Champion",
-      "Weak Pain",
-      "Wrong Stakeholder",
-      "No Budget Owner",
-      "Objections Unresolved",
-      "Political Resistance",
-      "Procurement Delay",
+    id: "8",
+    label: "Budget Discussion",
+    overlays: [
+      "Economic buyer alignment",
+      "Budget path",
+      "Priority justification",
+      "Trade-offs",
+    ],
+  },
+  {
+    id: "9",
+    label: "Procurement",
+    overlays: ["Procurement process", "Negotiation", "Decision signal"],
+  },
+  {
+    id: "10",
+    label: "Close",
+    overlays: [
+      "Decision reinforcement",
+      "Risk reassurance",
+      "Agreement",
+      "Expansion setup",
     ],
   },
 ];
@@ -145,16 +502,6 @@ export const guardrails: AccordionItemData[] = [
     body: "When you answer too fast or tell long stories, the buyer stops exploring their own thinking. You lose the chance to hear the language they use, the politics they hint at, and the emotion underneath the issue. Aim for short prompts, then let silence do some work.",
     open: false,
   },
-  {
-    title: "Ignoring Emotional and Personal Drivers",
-    body: "Deals are rarely moved by business logic alone. If you never learn who is under pressure, who wants promotion, or who fears failure, you miss the real energy behind a decision. Good discovery connects the business case to personal consequences.",
-    open: false,
-  },
-  {
-    title: "Not Identifying the 'Why Now'",
-    body: "Without a time-bound reason to act, the deal will drift. If the buyer cannot explain what changed recently or what deadline is approaching, there is no true momentum yet. Find the trigger event, the forcing function, or the cost of delay.",
-    open: false,
-  },
 ];
 
 export const bestPractices: AccordionItemData[] = [
@@ -176,16 +523,6 @@ export const bestPractices: AccordionItemData[] = [
   {
     title: "Uncover Personal Stakes",
     body: "Ask how this problem affects the buyer personally: credibility with leadership, team morale, promotion plans, or risk exposure. When a buyer ties the issue to their own success, momentum usually increases. Personal stakes are often the bridge between interest and action.",
-    open: false,
-  },
-  {
-    title: "Drive Toward a Clear Problem Statement",
-    body: "Before presenting a solution, aim to co-author a crisp sentence about the problem. For example: 'Your team lacks a reliable way to inspect deal health early enough to prevent quarter-end surprises.' A shared problem statement makes later validation much easier.",
-    open: false,
-  },
-  {
-    title: "Establish Urgency with 'Why Now'",
-    body: "Tie the conversation to a deadline, leadership change, missed target, or initiative already in motion. Buyers move faster when the problem is connected to a real event instead of a general aspiration. If there is no 'why now,' your next step should be finding it.",
     open: false,
   },
 ];
@@ -224,54 +561,6 @@ export const mockSteps: MockStepData[] = [
       "Ask what happens if the problem continues",
       "Look for operational and political consequences",
       "Your goal is to make the buyer explain the problem in their own words.",
-    ],
-    open: false,
-  },
-  {
-    title: "STEP 4 — Handle Real Buyer Behavior",
-    content: [
-      "Expect the buyer to be partial, busy, or guarded:",
-      "If they go vague, ask for a recent example",
-      "If they jump ahead, gently return to the problem",
-      "If they resist, acknowledge the concern before probing further",
-      "If they minimize pain, test the downstream impact",
-      "Real discovery improves when you stay calm instead of rushing to rescue the conversation.",
-    ],
-    open: false,
-  },
-  {
-    title: "STEP 5 — Close the Discovery Properly",
-    content: [
-      "End by synthesizing what you heard and proposing the next step:",
-      "Reflect the problem, impact, and urgency back to the buyer",
-      "Confirm what matters most to them",
-      "Outline what should happen next in the process",
-      "Assign a clear owner for follow-up",
-      "A good close creates momentum instead of just ending the meeting politely.",
-    ],
-    open: false,
-  },
-  {
-    title: "STEP 6 — Reflect Immediately",
-    content: [
-      "Review the call while the details are fresh:",
-      "What pain was confirmed versus assumed",
-      "Which stakeholder signals were strong or weak",
-      "Where urgency came from",
-      "What was still unclear after the conversation",
-      "This reflection helps you improve fast and sharpen the next touchpoint.",
-    ],
-    open: false,
-  },
-  {
-    title: "STEP 7 — Repeat and Improve",
-    content: [
-      "Use repetition to build better judgment:",
-      "Run the same scenario with a different persona",
-      "Try a stricter buyer who gives shorter answers",
-      "Practice deeper follow-up questions",
-      "Compare your first version to your latest version",
-      "The point is not perfection. It is building better instincts over time.",
     ],
     open: false,
   },
