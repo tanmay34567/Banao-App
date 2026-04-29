@@ -1,3 +1,4 @@
+import { HelpCircle } from "lucide-react";
 import type { PlaybookIcon } from "@/components/playbook/icons";
 
 type LayerCardProps = {
@@ -22,29 +23,34 @@ export function LayerCard({
       type="button"
       onClick={onClick}
       className={[
-        "flex min-w-[280px] items-center justify-between rounded-[18px] border bg-white px-4 py-3.5 text-left transition hover:border-[#cbc0ff] sm:min-w-[340px] sm:px-5 sm:py-4 md:min-w-[420px] md:rounded-[20px] md:px-6 md:py-4.5",
+        "group relative flex min-w-0 flex-1 items-center justify-between rounded-[16px] border bg-white px-3 py-3 text-left transition hover:border-[#cbc0ff] sm:rounded-[18px] sm:px-4 sm:py-3.5 md:rounded-[20px] md:px-5 md:py-4",
         active
           ? "border-[#cdc4ff] shadow-[0_10px_25px_rgba(120,106,252,0.08)]"
           : "border-[#e8e2ef] shadow-[0_8px_20px_rgba(31,35,51,0.04)]",
       ].join(" ")}
     >
-      <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+      <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
         <div
-          className={[
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] sm:h-11 sm:w-11 sm:rounded-[16px]",
-            active ? "bg-[#151b2b] text-white" : "bg-[#f5f2f0] text-[#767b8d]",
-          ].join(" ")}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-[#151b2b] text-white sm:h-10 sm:w-10 sm:rounded-[14px]"
         >
-          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+          <Icon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
         </div>
         <div className="min-w-0">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#73788b] sm:text-[11px] sm:tracking-[0.22em]">
+          <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.15em] text-[#73788b] sm:text-[10px] sm:tracking-[0.18em]">
             Layer {id}
+            <div className="relative group/tooltip">
+              <HelpCircle className="h-3 w-3 text-[#9ba1b7] transition-colors group-hover:text-[#7a6cff]" />
+              
+              {/* Tooltip positioned relative to the icon */}
+              <div className="invisible absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-[#e8e2ef] bg-white px-3 py-1.5 text-[11px] font-medium text-[#171d2a] shadow-[0_8px_20px_rgba(0,0,0,0.08)] opacity-0 transition-all group-hover/tooltip:visible group-hover/tooltip:mb-3 group-hover/tooltip:opacity-100">
+                Layer {title}
+                <div className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-b border-r border-[#e8e2ef] bg-white" />
+              </div>
+            </div>
           </div>
-          <div className="truncate text-[16px] font-semibold leading-tight text-[#171d2a] sm:text-[18px]">
+          <div className="truncate text-[14px] font-semibold leading-tight text-[#171d2a] sm:text-[16px]">
             {title}
           </div>
-          <div className="text-xs text-[#8b90a2] sm:text-sm">{description}</div>
         </div>
       </div>
 

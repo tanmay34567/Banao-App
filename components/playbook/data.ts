@@ -1,5 +1,5 @@
 import { Briefcase } from "lucide-react";
-import { ActivityMark, type PlaybookIcon } from "@/components/playbook/icons";
+import { ActivityMark, ConstructionIcon, type PlaybookIcon } from "@/components/playbook/icons";
 import { momentumSubstepDetails } from "@/components/playbook/substep-details";
 
 export type LayerDefinition = {
@@ -38,6 +38,20 @@ export type ConstructionTrack = {
   overlays: string[];
 };
 
+export type SignalStatus = "success" | "warning" | "error";
+
+export type SignalOverlay = {
+  text: string;
+  priority: string;
+  status: SignalStatus;
+};
+
+export type SignalTrack = {
+  id: string;
+  label: string;
+  overlays: SignalOverlay[];
+};
+
 export type AccordionItemData = {
   title: string;
   body: string;
@@ -61,7 +75,13 @@ export const layers: LayerDefinition[] = [
     id: "construction",
     title: "Deal Construction",
     description: "",
-    icon: Briefcase,
+    icon: ConstructionIcon,
+  },
+  {
+    id: "signal",
+    title: "Signal",
+    description: "",
+    icon: ActivityMark, // Using ActivityMark for Signal too as per screenshot
   },
 ];
 
@@ -1216,6 +1236,171 @@ export const constructionTracks: ConstructionTrack[] = [
       "Risk reassurance",
       "Agreement",
       "Expansion setup",
+    ],
+  },
+];
+
+export const signalTracks: SignalTrack[] = [
+  {
+    id: "0",
+    label: "Pre-Contact",
+    overlays: [
+      { text: "Personalised reply to outreach", priority: "P1", status: "success" },
+      { text: "Mentions specific context/problem", priority: "P1", status: "success" },
+      { text: "Quick response (<24h)", priority: "P2", status: "success" },
+      { text: "Generic reply (“sounds interesting”)", priority: "P2", status: "warning" },
+      { text: "Asks for deck immediately", priority: "P2", status: "warning" },
+      { text: "No response after multiple touchpoints", priority: "P1", status: "error" },
+      { text: "Redirects to generic email / junior", priority: "P1", status: "error" },
+    ],
+  },
+  {
+    id: "1",
+    label: "Contact",
+    overlays: [
+      { text: "Shows up on time", priority: "P2", status: "success" },
+      { text: "Mentions why they took the meeting", priority: "P1", status: "success" },
+      { text: "Shares context without prompting", priority: "P1", status: "success" },
+      { text: "Asks “what do you do?” only", priority: "P2", status: "warning" },
+      { text: "Passive / low energy engagement", priority: "P2", status: "warning" },
+      { text: "Distracted (multitasking, no camera, etc.)", priority: "P3", status: "warning" },
+      { text: "Late / reschedules multiple times", priority: "P1", status: "error" },
+      { text: "No clear reason for taking meeting", priority: "P1", status: "error" },
+    ],
+  },
+  {
+    id: "2",
+    label: "Interest",
+    overlays: [
+      { text: "Asks relevant follow-up questions", priority: "P1", status: "success" },
+      { text: "Connects to internal use case", priority: "P1", status: "success" },
+      { text: "Shares internal problems voluntarily", priority: "P1", status: "success" },
+      { text: "Requests next meeting", priority: "P1", status: "success" },
+      { text: "Says “this is interesting” without depth", priority: "P2", status: "warning" },
+      { text: "Focuses on features only", priority: "P2", status: "warning" },
+      { text: "Asks for deck/recording", priority: "P3", status: "warning" },
+      { text: "No next step commitment", priority: "P1", status: "error" },
+      { text: "Ghosts after initial call", priority: "P1", status: "error" },
+    ],
+  },
+  {
+    id: "3",
+    label: "Discovery",
+    overlays: [
+      { text: "Shares detailed workflows/process", priority: "P1", status: "success" },
+      { text: "Admits problems/pain clearly", priority: "P1", status: "success" },
+      { text: "Quantifies impact (time, money, etc.)", priority: "P1", status: "success" },
+      { text: "Introduces internal context/politics", priority: "P1", status: "success" },
+      { text: "Answers but stays surface-level", priority: "P1", status: "warning" },
+      { text: "Deflects deeper questions", priority: "P1", status: "warning" },
+      { text: "Keeps answers generic", priority: "P2", status: "warning" },
+      { text: "Avoids discussing impact", priority: "P1", status: "error" },
+      { text: "Says “everything is fine”", priority: "P1", status: "error" },
+    ],
+  },
+  {
+    id: "4",
+    label: "Validation",
+    overlays: [
+      { text: "Asks “will this work for us?”", priority: "P1", status: "success" },
+      { text: "Shares constraints/requirements", priority: "P1", status: "success" },
+      { text: "Engages in solution discussion", priority: "P1", status: "success" },
+      { text: "Compares approaches thoughtfully", priority: "P2", status: "success" },
+      { text: "Asks for generic demo", priority: "P2", status: "warning" },
+      { text: "Focuses only on features", priority: "P2", status: "warning" },
+      { text: "No clear evaluation criteria", priority: "P1", status: "warning" },
+      { text: "Repeats basic questions", priority: "P1", status: "error" },
+      { text: "Brings new objections late", priority: "P1", status: "error" },
+    ],
+  },
+  {
+    id: "5",
+    label: "Internal Discussion",
+    overlays: [
+      { text: "Mentions internal conversations happening", priority: "P1", status: "success" },
+      { text: "Shares feedback from others", priority: "P1", status: "success" },
+      { text: "Asks for material to share internally", priority: "P2", status: "success" },
+      { text: "Prepares for internal pitch", priority: "P1", status: "success" },
+      { text: "Says “will discuss internally” (no detail)", priority: "P1", status: "warning" },
+      { text: "Delays without explanation", priority: "P1", status: "warning" },
+      { text: "No visibility into stakeholders", priority: "P1", status: "warning" },
+      { text: "Goes silent after “internal discussion”", priority: "P1", status: "error" },
+      { text: "Comes back with new objections misaligned", priority: "P1", status: "error" },
+    ],
+  },
+  {
+    id: "6",
+    label: "Stakeholder Expansion",
+    overlays: [
+      { text: "Introduces new stakeholders proactively", priority: "P1", status: "success" },
+      { text: "Stakeholders engage with context", priority: "P1", status: "success" },
+      { text: "Persona-specific questions emerge", priority: "P1", status: "success" },
+      { text: "Multiple stakeholders attend calls", priority: "P1", status: "success" },
+      { text: "Stakeholders passive/silent", priority: "P2", status: "warning" },
+      { text: "Same person controls all communication", priority: "P1", status: "warning" },
+      { text: "“Will loop them later” repeatedly", priority: "P1", status: "warning" },
+      { text: "New stakeholder asks from scratch", priority: "P1", status: "error" },
+      { text: "Conflicting stakeholder opinions", priority: "P1", status: "error" },
+    ],
+  },
+  {
+    id: "7",
+    label: "Pilot / Test",
+    overlays: [
+      { text: "Commits resources/time for pilot", priority: "P1", status: "success" },
+      { text: "Defines success criteria", priority: "P1", status: "success" },
+      { text: "Engages actively during pilot", priority: "P1", status: "success" },
+      { text: "Shares feedback quickly", priority: "P1", status: "success" },
+      { text: "Vague pilot goals", priority: "P1", status: "warning" },
+      { text: "Low engagement during pilot", priority: "P1", status: "warning" },
+      { text: "Delays pilot start repeatedly", priority: "P1", status: "warning" },
+      { text: "No clear ownership on buyer side", priority: "P1", status: "error" },
+      { text: "Pilot runs but no decision path", priority: "P1", status: "error" },
+    ],
+  },
+  {
+    id: "8",
+    label: "Budget Discussion",
+    overlays: [
+      { text: "Asks structured pricing questions", priority: "P1", status: "success" },
+      { text: "Discusses budget range openly", priority: "P1", status: "success" },
+      { text: "Aligns cost with value", priority: "P1", status: "success" },
+      { text: "Mentions budget approval process", priority: "P1", status: "success" },
+      { text: "Asks for discount early", priority: "P2", status: "warning" },
+      { text: "Price sensitivity without context", priority: "P1", status: "warning" },
+      { text: "“Too expensive” without reasoning", priority: "P1", status: "error" },
+      { text: "Budget suddenly becomes blocker", priority: "P1", status: "error" },
+      { text: "No clarity on budget owner", priority: "P1", status: "error" },
+    ],
+  },
+  {
+    id: "9",
+    label: "Procurement",
+    overlays: [
+      { text: "Shares procurement steps/process", priority: "P1", status: "success" },
+      { text: "Introduces procurement team", priority: "P1", status: "success" },
+      { text: "Engages in contract discussion", priority: "P1", status: "success" },
+      { text: "Negotiates specifics", priority: "P1", status: "success" },
+      { text: "Delays citing process vaguely", priority: "P1", status: "warning" },
+      { text: "Legal/procurement slow without clarity", priority: "P2", status: "warning" },
+      { text: "Reopens solved topics", priority: "P1", status: "error" },
+      { text: "New stakeholders block deal", priority: "P1", status: "error" },
+      { text: "Endless negotiation loops", priority: "P1", status: "error" },
+    ],
+  },
+  {
+    id: "10",
+    label: "Close",
+    overlays: [
+      { text: "Confirms decision clearly", priority: "P1", status: "success" },
+      { text: "Aligns on next steps/timeline", priority: "P1", status: "success" },
+      { text: "Internal champion pushes closure", priority: "P1", status: "success" },
+      { text: "Verbal commitment given", priority: "P1", status: "success" },
+      { text: "“Almost there” without specifics", priority: "P1", status: "warning" },
+      { text: "Delays signing without reason", priority: "P1", status: "warning" },
+      { text: "Goes silent at final stage", priority: "P1", status: "error" },
+      { text: "Last-minute objections", priority: "P1", status: "error" },
+      { text: "Decision pushed indefinitely", priority: "P1", status: "error" },
     ],
   },
 ];
