@@ -3,28 +3,14 @@
 import React, { useState } from "react";
 import { 
   ChevronDown, 
-  ChevronUp, 
   Check, 
   X, 
   ArrowRight, 
   AlertTriangle, 
-  Info, 
-  Lightbulb, 
-  Zap, 
   Target, 
-  ShieldAlert, 
   Search,
-  MessageSquare,
   Sparkles,
-  ShieldCheck,
-  Ban,
-  Activity,
   Flame,
-  MousePointer2,
-  Lock,
-  DoorOpen,
-  Compass,
-  Microscope,
   ChevronLeft,
   ChevronRight,
   Fingerprint,
@@ -32,9 +18,6 @@ import {
   CheckCircle,
   CircleCheck,
   XCircle,
-  ClipboardCheck,
-  Minus,
-  Plus
 } from "lucide-react";
 import { SignalDetail } from "./signal-details";
 import { cn } from "@/lib/utils";
@@ -57,7 +40,7 @@ interface SignalDetailViewProps {
   prevSignalTitle?: string;
 }
 
-const statusConfig: Record<string, { label: string; color: string; bg: string; iconColor: string; icon: any }> = {
+const statusConfig: Record<string, { label: string; color: string; bg: string; iconColor: string; icon: typeof CircleCheck }> = {
   success: { label: "Strong Signal", color: "#239F71", bg: "#EDFDF5", iconColor: "#239F71", icon: CircleCheck },
   warning: { label: "Caution Signal", color: "#F57D14", bg: "#FFF7EB", iconColor: "#F57D14", icon: TriangleAlert },
   error: { label: "Negative Signal", color: "#E63737", bg: "#FEF1F1", iconColor: "#E63737", icon: XCircle },
@@ -77,6 +60,7 @@ function SectionIcon({ children }: { children: React.ReactNode }) {
   );
 }
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 export function SignalDetailView({ 
   signal, 
   onClose,
@@ -94,6 +78,7 @@ export function SignalDetailView({
   nextSignalStatus = "success",
   prevSignalTitle,
 }: SignalDetailViewProps) {
+/* eslint-enable @typescript-eslint/no-unused-vars */
   const [openAccordionIndex, setOpenAccordionIndex] = useState<number>(0);
   const cfg = statusConfig[status] || statusConfig.success;
 

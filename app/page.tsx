@@ -22,16 +22,17 @@ import {
   momentumSteps,
   signalTracks,
   type ConstructionTrack,
+  type SignalStatus,
   type SignalTrack,
 } from "@/components/playbook/data";
 import { ContentSection } from "@/components/playbook/content-section";
 import { LayerCard } from "@/components/playbook/layer-card";
 import { MockStep } from "@/components/playbook/mock-step";
-import { CircleNav, NavButton } from "@/components/playbook/nav-buttons";
+// nav-buttons imported on demand
 import { StepItem } from "@/components/playbook/step-item";
 import { TopBar } from "@/components/playbook/top-bar";
 import { SignalDetailView } from "@/components/playbook/signal-detail-view";
-import { signalDetailsData, getSignalDetail, type SignalDetail } from "@/components/playbook/signal-details";
+import { getSignalDetail } from "@/components/playbook/signal-details";
 import { cn } from "@/lib/utils";
 
 
@@ -184,10 +185,6 @@ export default function Home() {
 
   const activeMomentumStep = momentumSteps[activeMomentumStepIndex];
   const activeMomentumSubstepIndex = activeSubstepByMomentum[activeMomentumStepIndex] ?? 0;
-  const activeMomentumSubstep =
-    activeMomentumStep.substeps[
-      Math.min(activeMomentumSubstepIndex, activeMomentumStep.substeps.length - 1)
-    ];
   const activeMomentumDefinition = momentumDefinitions[activeMomentumStepIndex];
 
   const handleMomentumSubstepSelect = (index: number) => {
@@ -607,7 +604,7 @@ export default function Home() {
                     />
                     <div className="flex items-center gap-3 sm:gap-4">
                       {(constructionEnabled ? constructionTracks : signalTracks).flatMap((track: ConstructionTrack | SignalTrack, tIdx: number) => 
-                        track.overlays.map((overlay: string | { text: string; status: any }, oIdx: number) => {
+                        track.overlays.map((overlay: string | { text: string; status: SignalStatus }, oIdx: number) => {
                           const currentTracks: (ConstructionTrack | SignalTrack)[] = constructionEnabled ? constructionTracks : signalTracks;
                           let globalSubIndex = 0;
                           for (let i = 0; i < tIdx; i++) {

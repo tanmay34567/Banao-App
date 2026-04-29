@@ -1,4 +1,3 @@
-import { Briefcase } from "lucide-react";
 import { ActivityMark, ConstructionIcon, type PlaybookIcon } from "@/components/playbook/icons";
 import { momentumSubstepDetails } from "@/components/playbook/substep-details";
 

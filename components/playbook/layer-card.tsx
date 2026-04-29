@@ -10,6 +10,7 @@ type LayerCardProps = {
   onClick: () => void;
 };
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 export function LayerCard({
   id,
   title,
@@ -18,6 +19,7 @@ export function LayerCard({
   active,
   onClick,
 }: LayerCardProps) {
+/* eslint-enable @typescript-eslint/no-unused-vars */
   return (
     <button
       type="button"
