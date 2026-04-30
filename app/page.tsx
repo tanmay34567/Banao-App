@@ -32,7 +32,7 @@ import { MockStep } from "@/components/playbook/mock-step";
 import { StepItem } from "@/components/playbook/step-item";
 import { TopBar } from "@/components/playbook/top-bar";
 import { SignalDetailView } from "@/components/playbook/signal-detail-view";
-import { getSignalDetail } from "@/components/playbook/signal-details";
+import { getSignalDetail } from "@/data/signal";
 import { cn } from "@/lib/utils";
 
 

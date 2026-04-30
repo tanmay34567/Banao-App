@@ -19,7 +19,7 @@ import {
   CircleCheck,
   XCircle,
 } from "lucide-react";
-import { SignalDetail } from "./signal-details";
+import { SignalDetail } from "@/data/signal";
 import { cn } from "@/lib/utils";
 
 interface SignalDetailViewProps {
@@ -225,16 +225,16 @@ export function SignalDetailView({
           title="Why this is P1"
         >
           <div className="flex w-full flex-col gap-4 rounded-xl border border-[#F2F0FF] bg-[#F2F0FF] p-5">
-            <p className="text-sm text-[#0F1729]/80">{signal.whyP1.description}</p>
+            <p className="text-sm text-[#0F1729]/80">{signal.whyPriority.description}</p>
             <div className="flex gap-3">
               <div className="flex flex-1 items-center rounded-xl border border-[#C6ECDA] bg-white px-3 py-2.5">
                 <span className="text-sm font-bold text-[#239F71]">
-                  Strong read → {signal.whyP1.strongRead}
+                  Strong read → {signal.whyPriority.strongRead}
                 </span>
               </div>
               <div className="flex flex-1 items-center rounded-xl border border-[#F7D4D4] bg-white px-3 py-2.5">
                 <span className="text-sm font-bold text-[#E63737]">
-                  Misread → {signal.whyP1.misread}
+                  Misread → {signal.whyPriority.misread}
                 </span>
               </div>
             </div>
