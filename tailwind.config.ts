@@ -42,6 +42,18 @@ const config: Config = {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
         },
+        info: {
+          DEFAULT: "#6E52E0",
+          soft: "rgba(110, 82, 224, 0.1)",
+        },
+        success: {
+          DEFAULT: "#10B981",
+          soft: "rgba(16, 185, 129, 0.1)",
+        },
+        warn: {
+          DEFAULT: "#F59E0B",
+          soft: "rgba(245, 158, 11, 0.1)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

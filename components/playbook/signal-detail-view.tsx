@@ -38,6 +38,7 @@ interface SignalDetailViewProps {
   nextSignalPriority?: string;
   nextSignalStatus?: "success" | "warning" | "error";
   prevSignalTitle?: string;
+  highlight?: string;
 }
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; iconColor: string; icon: typeof CircleCheck }> = {
@@ -77,6 +78,7 @@ export function SignalDetailView({
   nextSignalPriority = "P1",
   nextSignalStatus = "success",
   prevSignalTitle,
+  highlight,
 }: SignalDetailViewProps) {
 /* eslint-enable @typescript-eslint/no-unused-vars */
   const [openAccordionIndex, setOpenAccordionIndex] = useState<number>(0);
@@ -158,16 +160,23 @@ export function SignalDetailView({
           title="What this signal means"
         >
           <div className="flex w-full flex-wrap gap-4">
-            {signal.meaning.subSignals.map((s, i) => (
-              <div
-                key={i}
-                className="flex min-w-[300px] flex-1 flex-col gap-1 rounded-xl border border-[#F2F0FF] bg-white p-4"
-                style={{ boxShadow: "inset 3px 0px 0px 1px #7454F2" }}
-              >
-                <span className="text-sm font-bold text-[#0F1729]">{s.title}</span>
-                <span className="text-sm text-[#6B7280]">{s.description}</span>
-              </div>
-            ))}
+            {signal.meaning.subSignals.map((s, i) => {
+              const isHighlighted = s.title === highlight || s.description === highlight;
+              return (
+                <div
+                  key={i}
+                  id={encodeURIComponent(s.title)}
+                  className={cn(
+                    "flex min-w-[300px] flex-1 flex-col gap-1 rounded-xl border border-[#F2F0FF] bg-white p-4 transition-all duration-700",
+                    isHighlighted ? "bg-[#f5f1ff] shadow-[0_0_0_4px_#f5f1ff]" : ""
+                  )}
+                  style={{ boxShadow: isHighlighted ? undefined : "inset 3px 0px 0px 1px #7454F2" }}
+                >
+                  <span className={cn("text-sm font-bold", isHighlighted ? "text-[#6f5cff]" : "text-[#0F1729]")}>{s.title}</span>
+                  <span className="text-sm text-[#6B7280]">{s.description}</span>
+                </div>
+              );
+            })}
           </div>
         </SectionBlock>
 
@@ -184,16 +193,38 @@ export function SignalDetailView({
                 <span className="text-sm font-bold text-[#239F71]">Real Personalisation</span>
               </div>
               <ul className="flex flex-col gap-1.5">
-                {signal.countsAsPersonalised.real.bullets.map((b, i) => (
-                  <li key={i} className="text-sm text-[#6B7280]">• {b}</li>
-                ))}
+                {signal.countsAsPersonalised.real.bullets.map((b, i) => {
+                  const isHighlighted = b === highlight;
+                  return (
+                    <li 
+                      key={i} 
+                      id={encodeURIComponent(b)}
+                      className={cn(
+                        "text-sm transition-all duration-700 rounded px-1",
+                        isHighlighted ? "bg-[#f5f1ff] text-[#6f5cff] font-medium" : "text-[#6B7280]"
+                      )}
+                    >
+                      • {b}
+                    </li>
+                  );
+                })}
               </ul>
               <div className="flex flex-col gap-2 pt-1">
-                {signal.countsAsPersonalised.real.quotes.map((q, i) => (
-                  <div key={i} className="rounded-r-[10px] bg-[#EDFDF5]/50 px-3 py-2">
-                    <p className="text-sm italic text-[#0F1729]">{q}</p>
-                  </div>
-                ))}
+                {signal.countsAsPersonalised.real.quotes.map((q, i) => {
+                  const isHighlighted = q === highlight;
+                  return (
+                    <div 
+                      key={i} 
+                      id={encodeURIComponent(q)}
+                      className={cn(
+                        "rounded-r-[10px] px-3 py-2 transition-all duration-700",
+                        isHighlighted ? "bg-[#f5f1ff] border-l-4 border-[#6f5cff]" : "bg-[#EDFDF5]/50"
+                      )}
+                    >
+                      <p className={cn("text-sm italic", isHighlighted ? "text-[#6f5cff]" : "text-[#0F1729]")}>{q}</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
             {/* Fake */}
@@ -204,16 +235,38 @@ export function SignalDetailView({
               </div>
               <p className="text-xs text-[#F57D14]/80">Weak signals disguised as strong</p>
               <ul className="flex flex-col gap-1.5">
-                {signal.countsAsPersonalised.fake.bullets.slice(1).map((b, i) => (
-                  <li key={i} className="text-sm text-[#6B7280]">• {b}</li>
-                ))}
+                {signal.countsAsPersonalised.fake.bullets.slice(1).map((b, i) => {
+                  const isHighlighted = b === highlight;
+                  return (
+                    <li 
+                      key={i} 
+                      id={encodeURIComponent(b)}
+                      className={cn(
+                        "text-sm transition-all duration-700 rounded px-1",
+                        isHighlighted ? "bg-[#f5f1ff] text-[#6f5cff] font-medium" : "text-[#6B7280]"
+                      )}
+                    >
+                      • {b}
+                    </li>
+                  );
+                })}
               </ul>
               <div className="flex flex-col gap-2 pt-1">
-                {signal.countsAsPersonalised.fake.quotes.map((q, i) => (
-                  <div key={i} className="rounded-r-[10px] bg-[#FEF1F1]/50 px-3 py-2">
-                    <p className="text-sm italic text-[#0F1729]">{q}</p>
-                  </div>
-                ))}
+                {signal.countsAsPersonalised.fake.quotes.map((q, i) => {
+                  const isHighlighted = q === highlight;
+                  return (
+                    <div 
+                      key={i} 
+                      id={encodeURIComponent(q)}
+                      className={cn(
+                        "rounded-r-[10px] px-3 py-2 transition-all duration-700",
+                        isHighlighted ? "bg-[#f5f1ff] border-l-4 border-[#6f5cff]" : "bg-[#FEF1F1]/50"
+                      )}
+                    >
+                      <p className={cn("text-sm italic", isHighlighted ? "text-[#6f5cff]" : "text-[#0F1729]")}>{q}</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

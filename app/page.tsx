@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { 
   ChevronDown, 
   Compass, 
@@ -10,7 +11,8 @@ import {
   ShieldAlert,
   ChevronLeft,
   ChevronRight,
-  Activity
+  Activity,
+  Brain
 } from "lucide-react";
 import {
   bestPractices,
@@ -34,6 +36,7 @@ import { TopBar } from "@/components/playbook/top-bar";
 import { SignalDetailView } from "@/components/playbook/signal-detail-view";
 import { getSignalDetail } from "@/data/signal";
 import { cn } from "@/lib/utils";
+import { NavigationFooter } from "@/components/playbook/navigation-footer";
 
 
 type DefinitionBlock =
@@ -149,7 +152,9 @@ function buildDefinitionBlocks(lines: string[]): DefinitionBlock[] {
   return blocks;
 }
 
-export default function Home() {
+import { Suspense } from "react";
+
+function HomeContent() {
   const [constructionEnabled, setConstructionEnabled] = useState(false);
   const [activeMomentumStepIndex, setActiveMomentumStepIndex] = useState(0);
   const [activeSubstepByMomentum, setActiveSubstepByMomentum] = useState<Record<number, number>>({
@@ -164,6 +169,7 @@ export default function Home() {
   const [activeSignalOverlayByTrack, setActiveSignalOverlayByTrack] = useState<Record<number, number>>({
     1: 0,
   });
+  const [psychologyEnabled, setPsychologyEnabled] = useState(false);
   const topRailRef = useRef<HTMLDivElement | null>(null);
   const railViewportRef = useRef<HTMLDivElement | null>(null);
   const topStepsRowRef = useRef<HTMLDivElement | null>(null);
@@ -183,26 +189,139 @@ export default function Home() {
     subCenter: 0
   });
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const highlight = searchParams.get("highlight");
+
+  useEffect(() => {
+    const layer = searchParams.get("layer");
+    if (layer === "signal") {
+      setSignalEnabled(true);
+      setConstructionEnabled(false);
+      setPsychologyEnabled(false);
+    } else if (layer === "construction") {
+      setConstructionEnabled(true);
+      setSignalEnabled(false);
+      setPsychologyEnabled(false);
+    }
+
+    const highlight = searchParams.get("highlight");
+
+    const stage = searchParams.get("stage");
+    if (stage) {
+      const stageMap: Record<string, number> = {
+        "pre-contact": -1,
+        contact: 0,
+        interest: 1,
+        discovery: 2,
+        validation: 3,
+        internal: 4,
+        stakeholder: 5,
+        pilot: 6,
+        budget: 7,
+        procurement: 8,
+        close: 9,
+      };
+      
+      if (stageMap[stage] !== undefined) {
+        const stageIdx = stageMap[stage];
+        if (stage === "pre-contact") {
+          setActiveConstructionTrackIndex(0);
+          setConstructionEnabled(true);
+          setSignalEnabled(false);
+          setPsychologyEnabled(false);
+        } else {
+          setActiveMomentumStepIndex(stageIdx);
+          // Also ensure construction/signal tracks match if they are enabled
+          if (constructionEnabled) {
+            setActiveConstructionTrackIndex(stageIdx + 1);
+          }
+          if (signalEnabled) {
+            setActiveSignalTrackIndex(stageIdx + 1);
+          }
+
+          // Handle substep deep-linking
+          const substepId = searchParams.get("substep");
+          if (substepId) {
+            const substepIdx = momentumSteps[stageIdx].substeps.findIndex(s => s.id === substepId);
+            if (substepIdx !== -1) {
+              setActiveSubstepByMomentum(prev => ({
+                ...prev,
+                [stageIdx]: substepIdx
+              }));
+            }
+          }
+
+          // Handle signal overlay deep-linking
+          const overlayIdx = searchParams.get("overlay");
+          if (overlayIdx !== null && layer === "signal") {
+            const idx = parseInt(overlayIdx);
+            setActiveSignalOverlayByTrack(prev => ({
+              ...prev,
+              [stageIdx + 1]: idx
+            }));
+          }
+        }
+      }
+    }
+
+    // Exact text scrolling logic
+    if (highlight) {
+      setTimeout(() => {
+        const el = document.getElementById(encodeURIComponent(highlight));
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else if (stage) {
+          // Fallback to scrolling to the stage section if text not found yet
+          window.scrollTo({ top: 400, behavior: "smooth" });
+        }
+      }, 600); // Wait for animations/renders
+    }
+    // Cleanup URL parameters after use
+    const hasDeepLink = searchParams.get("stage") || searchParams.get("layer") || searchParams.get("highlight");
+    if (hasDeepLink) {
+      setTimeout(() => {
+        router.replace(pathname, { scroll: false });
+      }, 2000); // Wait 2s so the user sees the highlight, then clean up URL
+    }
+  }, [searchParams, constructionEnabled, signalEnabled, router, pathname]);
+
   const activeMomentumStep = momentumSteps[activeMomentumStepIndex];
   const activeMomentumSubstepIndex = activeSubstepByMomentum[activeMomentumStepIndex] ?? 0;
   const activeMomentumDefinition = momentumDefinitions[activeMomentumStepIndex];
 
+  const activeMomentumDefinitionWithBlocks = useMemo(() => {
+    return {
+      ...activeMomentumDefinition,
+      sections: activeMomentumDefinition.sections.map((section) => ({
+        ...section,
+        blocks: buildDefinitionBlocks(section.lines),
+      })),
+    };
+  }, [activeMomentumDefinition]);
+
   const handleMomentumSubstepSelect = (index: number) => {
-    setActiveSubstepByMomentum((current) => ({
-      ...current,
-      [activeMomentumStepIndex]: index,
-    }));
+    setActiveSubstepByMomentum((current) => {
+      const isAlreadyActive = current[activeMomentumStepIndex] === index;
+      const nextIndex = isAlreadyActive ? -1 : index;
 
-    const substep = activeMomentumStep.substeps[index];
-    if (!substep) {
-      return;
-    }
+      if (nextIndex !== -1) {
+        const substep = activeMomentumStep.substeps[index];
+        if (substep) {
+          requestAnimationFrame(() => {
+            momentumSubstepSectionRefs.current[substep.id]?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          });
+        }
+      }
 
-    requestAnimationFrame(() => {
-      momentumSubstepSectionRefs.current[substep.id]?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+      return {
+        ...current,
+        [activeMomentumStepIndex]: nextIndex,
+      };
     });
   };
 
@@ -457,9 +576,19 @@ export default function Home() {
     };
 
     updateRailGeometry();
-    window.addEventListener("resize", updateRailGeometry);
+    
+    let resizeTimer: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(updateRailGeometry, 100);
+    };
+    
+    window.addEventListener("resize", handleResize);
 
-    return () => window.removeEventListener("resize", updateRailGeometry);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(resizeTimer);
+    };
   }, [
     activeConstructionTrackIndex,
     activeConstructionOverlayIndex,
@@ -515,41 +644,50 @@ export default function Home() {
   ]);
 
   return (
-    <main className="min-h-screen bg-white px-0 text-[#1f2333]">
-      <div className="mx-auto max-w-[2010px] bg-white">
+    <main className="min-h-screen bg-white px-0 text-[#1f2333]" style={{ overflowX: "clip" }}>
+      <div className="mx-auto max-w-[1400px] bg-white">
         <TopBar />
 
         <section className="border-b border-[#ece9f6] bg-white px-4 py-8 sm:px-6 sm:py-10 lg:px-8 xl:px-12">
-          <div className="mx-auto max-w-[1520px]">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4 lg:gap-6">
+          <div className="mx-auto max-w-[1400px]">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4 lg:gap-5">
               {layers.map((layer) => (
                 <LayerCard
                   key={layer.id}
                   {...layer}
                   active={
-                    layer.id === "momentum" 
-                      ? true 
-                      : layer.id === "construction" 
-                        ? constructionEnabled 
-                        : signalEnabled
+                    layer.id === "momentum"
+                      ? true
+                      : layer.id === "construction"
+                        ? constructionEnabled
+                        : layer.id === "signal"
+                          ? signalEnabled
+                          : psychologyEnabled
                   }
-                  onClick={() => {
+                  onToggle={() => {
                     if (layer.id === "momentum") return;
 
                     if (layer.id === "construction") {
                       const newState = !constructionEnabled;
                       setConstructionEnabled(newState);
+                      setSignalEnabled(false);
+                      setPsychologyEnabled(false);
                       if (newState) {
-                        setSignalEnabled(false);
                         setActiveConstructionTrackIndex(activeMomentumStepIndex + 1);
                       }
                     } else if (layer.id === "signal") {
                       const newState = !signalEnabled;
                       setSignalEnabled(newState);
+                      setConstructionEnabled(false);
+                      setPsychologyEnabled(false);
                       if (newState) {
-                        setConstructionEnabled(false);
                         setActiveSignalTrackIndex(activeMomentumStepIndex + 1);
                       }
+                    } else if (layer.id === "psychology") {
+                      const newState = !psychologyEnabled;
+                      setPsychologyEnabled(newState);
+                      setConstructionEnabled(false);
+                      setSignalEnabled(false);
                     }
                   }}
                 />
@@ -559,7 +697,7 @@ export default function Home() {
         </section>
 
         <section className="border-b border-[#ece9f6] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 xl:px-12">
-          <div className="mx-auto max-w-[1520px]">
+          <div className="mx-auto max-w-[1400px]">
             <div
               ref={railViewportRef}
               className="scrollbar-hidden overflow-x-auto pb-3"
@@ -696,7 +834,7 @@ export default function Home() {
         </section>
 
         <section className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8 xl:px-12">
-          <div className="mx-auto max-w-[1520px]">
+          <div className="mx-auto max-w-[1400px]">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
               {!constructionEnabled && !signalEnabled ? (
                 <aside className="w-full shrink-0 lg:sticky lg:top-4 lg:w-[340px] lg:self-start">
@@ -836,6 +974,7 @@ export default function Home() {
                       priority={activeSignalPriority}
                       status={activeSignalStatus}
                       stepLabel={activeSignalTrack.label}
+                      highlight={highlight || undefined}
                     />
                   ) : (
                     <section className="w-full rounded-[12px] border border-[#E5E0DC] bg-[#F0EDFD] p-5 sm:p-7">
@@ -844,13 +983,13 @@ export default function Home() {
                         Definition
                       </div>
                       <div className="space-y-6">
-                        {activeMomentumDefinition.sections.map((section) => (
+                        {activeMomentumDefinitionWithBlocks.sections.map((section) => (
                           <div key={section.title} className="space-y-2.5">
                             <h3 className="text-[14px] font-semibold text-[#131720]">
                               {section.title}
                             </h3>
                             <div className="space-y-1.5">
-                              {buildDefinitionBlocks(section.lines).map((block, index) => {
+                              {section.blocks.map((block, index) => {
                                 if (block.type === "paragraph") {
                                   return (
                                     <p
@@ -968,9 +1107,19 @@ export default function Home() {
                               {isOpen ? (
                                 <div className="mt-4 space-y-2.5 border-t border-[#f0ebfa] pt-4 text-[14px] leading-7 text-[#555b70] sm:text-[15px]">
                                   {buildDefinitionBlocks(contentLines).map((block, blockIndex) => {
+                                    const isHighlighted = block.type !== "list" && block.text === highlight;
                                     if (block.type === "paragraph") {
                                       return (
-                                        <p key={`${substep.id}-${blockIndex}`}>{block.text}</p>
+                                        <p 
+                                          key={`${substep.id}-${blockIndex}`}
+                                          id={encodeURIComponent(block.text)}
+                                          className={cn(
+                                            "transition-all duration-700 rounded px-1",
+                                            isHighlighted ? "bg-[#f5f1ff] text-[#6f5cff] font-medium shadow-[0_0_0_4px_#f5f1ff]" : ""
+                                          )}
+                                        >
+                                          {block.text}
+                                        </p>
                                       );
                                     }
 
@@ -978,7 +1127,11 @@ export default function Home() {
                                       return (
                                         <p
                                           key={`${substep.id}-${blockIndex}`}
-                                          className="pt-1 font-semibold text-[#2d3345]"
+                                          id={encodeURIComponent(block.text)}
+                                          className={cn(
+                                            "pt-1 font-semibold text-[#2d3345] transition-all duration-700 rounded px-1",
+                                            isHighlighted ? "bg-[#f5f1ff] text-[#6f5cff] shadow-[0_0_0_4px_#f5f1ff]" : ""
+                                          )}
                                         >
                                           {block.text}
                                         </p>
@@ -990,11 +1143,21 @@ export default function Home() {
                                         key={`${substep.id}-${blockIndex}`}
                                         className="space-y-1.5 pl-5 text-[#555b70]"
                                       >
-                                        {block.items.map((item) => (
-                                          <li key={item} className="list-disc">
-                                            {item}
-                                          </li>
-                                        ))}
+                                        {block.items.map((item) => {
+                                          const itemHighlighted = item === highlight;
+                                          return (
+                                            <li 
+                                              key={item} 
+                                              id={encodeURIComponent(item)}
+                                              className={cn(
+                                                "list-disc transition-all duration-700 rounded px-1",
+                                                itemHighlighted ? "bg-[#f5f1ff] text-[#6f5cff] font-medium shadow-[0_0_0_4px_#f5f1ff]" : ""
+                                              )}
+                                            >
+                                              {item}
+                                            </li>
+                                          );
+                                        })}
                                       </ul>
                                     );
                                   })}
@@ -1003,6 +1166,51 @@ export default function Home() {
                             </section>
                           );
                         })}
+                      </div>
+                    </section>
+                  )}
+
+                  {psychologyEnabled && !signalEnabled && (
+                    <section className="space-y-6">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#7B61FF]/10">
+                          <Brain className="h-6 w-6 text-[#7B61FF]" />
+                        </div>
+                        <h2 className="text-[28px] font-semibold text-[#7B61FF]">
+                          Buyer Psychology
+                        </h2>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        {/* What Buyer Is Thinking */}
+                        <div className="rounded-xl border border-[#E5E0DC] bg-[#F3F0FF] p-5">
+                          <div className="mb-3 text-[11px] font-bold uppercase tracking-[0.15em] text-[#7B61FF]">
+                            What Buyer Is Thinking
+                          </div>
+                          <p className="text-[14px] font-medium italic text-[#131720]">
+                            &ldquo;Is this person actually going to help me, or just sell to me?&rdquo;
+                          </p>
+                        </div>
+
+                        {/* What Buyer Is Feeling */}
+                        <div className="rounded-xl border border-[#E5E0DC] bg-[#E8F7F1] p-5">
+                          <div className="mb-3 text-[11px] font-bold uppercase tracking-[0.15em] text-[#279B70]">
+                            What Buyer Is Feeling
+                          </div>
+                          <p className="text-[14px] text-[#606876]">
+                            Cautious optimism — open to a real conversation, allergic to a pitch.
+                          </p>
+                        </div>
+
+                        {/* What Buyer Is Avoiding */}
+                        <div className="rounded-xl border border-[#E5E0DC] bg-[#FFF5F5] p-5">
+                          <div className="mb-3 text-[11px] font-bold uppercase tracking-[0.15em] text-[#E05429]">
+                            What Buyer Is Avoiding
+                          </div>
+                          <p className="text-[14px] text-[#606876]">
+                            Wasting cycles on a vendor who can&rsquo;t articulate their problem back.
+                          </p>
+                        </div>
                       </div>
                     </section>
                   )}
@@ -1070,72 +1278,21 @@ export default function Home() {
                     </section>
                   )}
                 </div>
-
-                <footer className="mt-8 border-t border-[#ece9f6] py-10">
-                  <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
-                    {/* Previous Navigation */}
-                    <div className="flex flex-1 items-center gap-5">
-                      <button 
-                        onClick={handlePrev}
-                        disabled={!canGoToPreviousOverlay}
-                        className="group flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#6B7280] shadow-sm transition-all hover:bg-[#F9FAFB] hover:border-[#D1D5DB] disabled:opacity-30 disabled:cursor-not-allowed" 
-                        aria-label="Previous step"
-                      >
-                        <ChevronLeft className="h-5 w-5 transition-transform group-hover:-translate-x-0.5" />
-                      </button>
-                      <div className="space-y-0.5">
-                        <div className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#9CA3AF]">Previous</div>
-                        <div className="text-[14px] font-semibold text-[#1F2937]">
-                          {canGoToPreviousOverlay ? `Step ${String(currentPrimaryIndex).padStart(2, '0')}` : "None"}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Centered Track Indicators */}
-                    <div className="flex flex-col items-center gap-3 lg:flex-1">
-                      <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#6B7280]">
-                        {constructionEnabled
-                          ? activeConstructionTrack.label
-                          : signalEnabled
-                            ? activeSignalTrack.label
-                            : activeMomentumStep.label}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {Array.from({ length: currentPrimaryLength }).map((_, i) => (
-                          <div 
-                            key={i} 
-                            className={cn(
-                              "h-1.5 w-1.5 rounded-full transition-all duration-300",
-                              i === currentPrimaryIndex 
-                                ? "bg-[#0F1729] scale-125" 
-                                : "bg-[#E5E7EB]"
-                            )} 
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Next Navigation */}
-                    <div className="flex flex-1 items-center justify-end gap-5">
-                      <div className="space-y-0.5 text-right">
-                        <div className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#9CA3AF]">Next</div>
-                        <div className="text-[14px] font-semibold text-[#1F2937]">
-                          {canGoToNextOverlay ? `Step ${String(currentPrimaryIndex + 2).padStart(2, '0')}` : "End"}
-                        </div>
-                      </div>
-                      <button 
-                        onClick={handleNext}
-                        disabled={!canGoToNextOverlay}
-                        className="group flex h-11 w-11 items-center justify-center rounded-full bg-[#0F1729] text-white shadow-md transition-all hover:bg-[#1a253b] hover:shadow-lg disabled:opacity-30 disabled:cursor-not-allowed" 
-                        aria-label="Next step"
-                      >
-                        <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
-                      </button>
-                    </div>
-                  </div>
-                </footer>
               </div>
             </div>
+
+            <NavigationFooter
+              handlePrev={handlePrev}
+              handleNext={handleNext}
+              canGoToPreviousOverlay={canGoToPreviousOverlay}
+              canGoToNextOverlay={canGoToNextOverlay}
+              currentPrimaryIndex={currentPrimaryIndex}
+              constructionEnabled={constructionEnabled}
+              signalEnabled={signalEnabled}
+              activeConstructionTrack={activeConstructionTrack}
+              activeSignalTrack={activeSignalTrack}
+              activeMomentumStep={activeMomentumStep}
+            />
           </div>
         </section>
 
@@ -1156,5 +1313,13 @@ export default function Home() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }

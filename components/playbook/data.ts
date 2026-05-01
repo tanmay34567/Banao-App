@@ -1,4 +1,4 @@
-import { ActivityMark, ConstructionIcon, type PlaybookIcon } from "@/components/playbook/icons";
+import { ActivityMark, ConstructionIcon, Brain, type PlaybookIcon } from "@/components/playbook/icons";
 import { momentumSubstepDetails } from "@/components/playbook/substep-details";
 
 export type LayerDefinition = {
@@ -81,6 +81,12 @@ export const layers: LayerDefinition[] = [
     title: "Signal",
     description: "",
     icon: ActivityMark, // Using ActivityMark for Signal too as per screenshot
+  },
+  {
+    id: "psychology",
+    title: "Buyer Psychology",
+    description: "",
+    icon: Brain,
   },
 ];
 

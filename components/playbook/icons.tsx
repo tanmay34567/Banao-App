@@ -12,6 +12,8 @@ import {
   Users,
 } from "lucide-react";
 
+export { Brain };
+
 export type PlaybookIcon = React.ComponentType<{ className?: string }>;
 
 export function getStepIcon(label: string): PlaybookIcon {

@@ -7,25 +7,19 @@ type LayerCardProps = {
   description: string;
   icon: PlaybookIcon;
   active: boolean;
-  onClick: () => void;
+  onToggle: () => void;
 };
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 export function LayerCard({
-  id,
   title,
-  description,
   icon: Icon,
   active,
-  onClick,
+  onToggle,
 }: LayerCardProps) {
-/* eslint-enable @typescript-eslint/no-unused-vars */
   return (
-    <button
-      type="button"
-      onClick={onClick}
+    <div
       className={[
-        "group relative flex min-w-0 flex-1 items-center justify-between rounded-[16px] border bg-white px-3 py-3 text-left transition hover:border-[#cbc0ff] sm:rounded-[18px] sm:px-4 sm:py-3.5 md:rounded-[20px] md:px-5 md:py-4",
+        "group relative flex min-w-0 flex-1 items-center justify-between rounded-[16px] border bg-white px-3 py-3 text-left transition sm:rounded-[18px] sm:px-4 sm:py-3.5 md:rounded-[20px] md:px-5 md:py-4",
         active
           ? "border-[#cdc4ff] shadow-[0_10px_25px_rgba(120,106,252,0.08)]"
           : "border-[#e8e2ef] shadow-[0_8px_20px_rgba(31,35,51,0.04)]",
@@ -38,15 +32,15 @@ export function LayerCard({
           <Icon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
         </div>
         <div className="min-w-0">
-          <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.15em] text-[#73788b] sm:text-[10px] sm:tracking-[0.18em]">
-            Layer {id}
-            <div className="relative group/tooltip">
-              <HelpCircle className="h-3 w-3 text-[#9ba1b7] transition-colors group-hover:text-[#7a6cff]" />
-              
-              {/* Tooltip positioned relative to the icon */}
-              <div className="invisible absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-[#e8e2ef] bg-white px-3 py-1.5 text-[11px] font-medium text-[#171d2a] shadow-[0_8px_20px_rgba(0,0,0,0.08)] opacity-0 transition-all group-hover/tooltip:visible group-hover/tooltip:mb-3 group-hover/tooltip:opacity-100">
-                Layer {title}
-                <div className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-b border-r border-[#e8e2ef] bg-white" />
+          <div className="flex items-center gap-1 text-[9px] font-semibold uppercase tracking-[0.15em] text-[#73788b] sm:text-[10px] sm:tracking-[0.18em]">
+            <span className="whitespace-nowrap truncate">Layer {title.split(" ").pop()}</span>
+            <div className="relative inline-flex shrink-0">
+              <HelpCircle className="peer h-3 w-3 text-[#9ba1b7] transition-colors hover:text-[#7a6cff]" />
+
+              {/* Tooltip - positioned above and constrained within card */}
+              <div className="invisible absolute bottom-full right-0 z-30 mb-2 rounded-lg border border-[#e8e2ef] bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#171d2a] shadow-[0_8px_20px_rgba(0,0,0,0.08)] opacity-0 transition-all peer-hover:visible peer-hover:mb-3 peer-hover:opacity-100">
+                <span className="whitespace-nowrap">{title}</span>
+                <div className="absolute -bottom-1 right-2 h-2 w-2 rotate-45 border-b border-r border-[#e8e2ef] bg-white" />
               </div>
             </div>
           </div>
@@ -56,11 +50,14 @@ export function LayerCard({
         </div>
       </div>
 
-      <div
+      <button
+        type="button"
+        onClick={onToggle}
         className={[
           "relative h-7 w-[48px] shrink-0 rounded-full transition sm:h-8 sm:w-[54px]",
           active ? "bg-[#8a7cff]" : "bg-[#ecebf1]",
         ].join(" ")}
+        aria-label={active ? `Disable ${title}` : `Enable ${title}`}
       >
         <div
           className={[
@@ -68,7 +65,7 @@ export function LayerCard({
             active ? "left-[23px] sm:left-[26px]" : "left-1",
           ].join(" ")}
         />
-      </div>
-    </button>
+      </button>
+    </div>
   );
 }
